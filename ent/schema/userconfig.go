@@ -14,7 +14,7 @@ type UserConfig struct {
 func (UserConfig) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("playerID").
-			NotEmpty(),
+			NotEmpty().Unique(),
 		field.Strings("cards"),
 		field.String("ladder").
 			NotEmpty(),

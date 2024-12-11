@@ -14,7 +14,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		// 定义 username 字段，类型为字符串，不允许为空。
-		field.String("username").NotEmpty(),
+		field.String("username").NotEmpty().Unique(),
 		// 定义 password 字段，类型为字符串，不允许为空。
 		field.String("password").NotEmpty(),
 	}

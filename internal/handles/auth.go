@@ -1,29 +1,65 @@
 package handles
 
-import "github.com/gin-gonic/gin"
+import (
+	"cardGame/config"
+	"cardGame/ent/user"
+	"cardGame/internal/util"
+	"context"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"time"
+)
 
-type LoginRequest struct {
+type Account struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 func Login(c *gin.Context) {
-	var req LoginRequest
+	var req Account
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
+		util.ErrorStrResp(c, "JSON invalid", 400, true)
 		return
 	}
+	User, err := config.SqlClient.User.
+		Query().
+		Where(user.Username(req.Username)).
+		First(context.Background())
+	if err != nil {
+		util.ErrorResp(c, err, 400, true)
+	}
 
+	if User.Password != req.Password {
+		util.ErrorStrResp(c, "Password error", 401, true)
+	} else {
+		c.SetCookie("playerID", User.Username, 3600, "/", "localhost", false, true)
+		util.SuccessResp(c)
+	}
 }
 
 func Logout(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "pong",
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "playerID",      // cookie的名称
+		Value:    "",              // cookie的值设置为空
+		Expires:  time.Unix(0, 0), // 设置过期时间为1970年1月1日
+		HttpOnly: true,            // 设置HttpOnly标志，提高安全性
+		Path:     "/",             // 设置cookie的有效路径
 	})
+	util.SuccessResp(c)
 }
 
 func Register(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "pong",
-	})
+	var req Account
+	if err := c.BindJSON(&req); err != nil {
+		util.ErrorResp(c, err, http.StatusBadRequest, true)
+		return
+	}
+	_, err := config.SqlClient.
+		User.Create().SetUsername(req.Username).SetPassword(req.Password).Save(context.Background())
+	if err != nil {
+		panic(err)
+		util.ErrorResp(c, err, 200, true)
+	}
+	util.SuccessResp(c)
 }

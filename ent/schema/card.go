@@ -3,7 +3,6 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 )
 
 // Card holds the schema definition for the Card entity.
@@ -14,8 +13,7 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
-		// Name field with type string and not empty constraint.
-		field.String("Name").NotEmpty(),
+		field.String("Name").NotEmpty().Unique(),
 		// Type field with type string.
 		field.String("Type"),
 		// Energy field with type int.
@@ -44,13 +42,4 @@ func (Card) Edges() []ent.Edge {
 	// If Card has relationships with other entities, define them here.
 	// Since there are no relationships provided in the example, return an empty slice.
 	return nil
-}
-
-// Indexes of the Card.
-func (Card) Indexes() []ent.Index {
-	// Define indexes for the Card entity.
-	return []ent.Index{
-		// Unique index on the Name field.
-		index.Fields("Name").Unique(),
-	}
 }

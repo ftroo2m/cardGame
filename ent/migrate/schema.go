@@ -11,7 +11,7 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeString},
 		{Name: "energy", Type: field.TypeInt},
 		{Name: "target", Type: field.TypeString},
@@ -28,18 +28,11 @@ var (
 		Name:       "cards",
 		Columns:    CardsColumns,
 		PrimaryKey: []*schema.Column{CardsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "card_name",
-				Unique:  true,
-				Columns: []*schema.Column{CardsColumns[1]},
-			},
-		},
 	}
 	// MonstersColumns holds the columns for the "monsters" table.
 	MonstersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "hp", Type: field.TypeInt},
 		{Name: "block", Type: field.TypeInt},
 		{Name: "power", Type: field.TypeJSON},
@@ -51,18 +44,11 @@ var (
 		Name:       "monsters",
 		Columns:    MonstersColumns,
 		PrimaryKey: []*schema.Column{MonstersColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "monster_name",
-				Unique:  true,
-				Columns: []*schema.Column{MonstersColumns[1]},
-			},
-		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "username", Type: field.TypeString},
+		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -74,7 +60,7 @@ var (
 	// UserConfigsColumns holds the columns for the "user_configs" table.
 	UserConfigsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "player_id", Type: field.TypeString},
+		{Name: "player_id", Type: field.TypeString, Unique: true},
 		{Name: "cards", Type: field.TypeJSON},
 		{Name: "ladder", Type: field.TypeString},
 		{Name: "player_hp", Type: field.TypeString},

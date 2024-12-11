@@ -3,7 +3,6 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 )
 
 // Monster holds the schema definition for the Monster entity.
@@ -16,7 +15,7 @@ type Monster struct {
 func (Monster) Fields() []ent.Field {
 	return []ent.Field{
 		// Name field with type string and not empty constraint.
-		field.String("Name").NotEmpty(),
+		field.String("Name").NotEmpty().Unique(),
 		// HP field with type int.
 		field.Int("HP"),
 		// Block field with type int.
@@ -37,14 +36,4 @@ func (Monster) Edges() []ent.Edge {
 	// If Monster has relationships with other entities, define them here.
 	// Since there are no relationships provided in the example, return an empty slice.
 	return nil
-}
-
-// Indexes of the Monster.
-func (Monster) Indexes() []ent.Index {
-	// Define indexes for the Monster entity if needed.
-	// For example, you might want to index the Name field to improve query performance.
-	return []ent.Index{
-		// Unique index on the Name field.
-		index.Fields("Name").Unique(),
-	}
 }
