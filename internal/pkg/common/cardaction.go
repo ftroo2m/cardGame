@@ -1,8 +1,11 @@
 package common
 
-import "cardGame/internal/model"
+import (
+	"cardGame/ent"
+	"cardGame/internal/model"
+)
 
-func DealDamageEqualToBlock(player *model.Player, monster *model.Monster) {
+func DealDamageEqualToBlock(player *model.Player, monster *ent.Monster) {
 	monster.HP -= DamageCalculateToMonster(player, monster, player.Block)
 }
 
@@ -24,7 +27,7 @@ func RemoveHealth(player *model.Player, damage int) {
 	player.HP -= damage
 }
 
-func AddRegenToDamage(player *model.Player, monster *model.Monster, damage int) {
+func AddRegenToDamage(player *model.Player, monster *ent.Monster, damage int) {
 	player.Power["regen"] += damage
 	monster.HP -= DamageCalculateToMonster(player, monster, damage)
 }

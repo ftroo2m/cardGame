@@ -1,8 +1,11 @@
 package common
 
-import "cardGame/internal/model"
+import (
+	"cardGame/ent"
+	"cardGame/internal/model"
+)
 
-func DamageCalculateToMonster(player *model.Player, monster *model.Monster, origin int) int {
+func DamageCalculateToMonster(player *model.Player, monster *ent.Monster, origin int) int {
 	// 计算玩家对怪物造成的伤害
 	damage := origin + player.Power["strength"]
 	if monster.Power["vulnerable"] != 0 {
@@ -23,7 +26,7 @@ func DamageCalculateToMonster(player *model.Player, monster *model.Monster, orig
 	}
 }
 
-func DamageCalculateToPlayer(player model.Player, monster model.Monster, origin int) int {
+func DamageCalculateToPlayer(player model.Player, monster ent.Monster, origin int) int {
 	// 计算怪物对玩家造成的伤害
 	damage := origin + monster.Power["strength"]
 
