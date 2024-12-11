@@ -1,6 +1,9 @@
 package schema
 
-import "entgo.io/ent"
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
 
 // UserConfig holds the schema definition for the UserConfig entity.
 type UserConfig struct {
@@ -9,7 +12,18 @@ type UserConfig struct {
 
 // Fields of the UserConfig.
 func (UserConfig) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.String("playerID").
+			NotEmpty(),
+		field.Strings("cards"),
+		field.String("ladder").
+			NotEmpty(),
+		field.String("playerHP").
+			NotEmpty(),
+		field.Int("playerEnergy"),
+		field.String("image").
+			Optional(),
+	}
 }
 
 // Edges of the UserConfig.

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"cardGame/ent"
 	"github.com/gorilla/websocket"
 	"math/rand"
 	"time"
@@ -8,9 +9,9 @@ import (
 
 type Game struct {
 	Player     *Player
-	Monster    Monster
-	Cards      []Card
-	UsedCards  []Card
+	Monster    *ent.Monster
+	Cards      []ent.Card
+	UsedCards  []ent.Card
 	PlayerConn *websocket.Conn
 	rng        *rand.Rand // 随机数生成器
 }
@@ -22,7 +23,7 @@ func (g *Game) DrawCard(num int) {
 	for i := 0; i < num; i++ {
 		if len(g.Cards) == 0 {
 			g.Cards = g.UsedCards
-			g.UsedCards = []Card{}
+			g.UsedCards = []ent.Card{}
 		}
 		index := g.rng.Intn(len(g.Cards))
 		selectedCard := g.Cards[index]
@@ -34,8 +35,8 @@ func (g *Game) DrawCard(num int) {
 func NewGame(player *Player, conn *websocket.Conn) *Game {
 	return &Game{
 		Player:     player,
-		Cards:      []Card{},
-		UsedCards:  []Card{},
+		Cards:      []ent.Card{},
+		UsedCards:  []ent.Card{},
 		PlayerConn: conn,
 		rng:        rand.New(rand.NewSource(time.Now().UnixNano())),
 	}

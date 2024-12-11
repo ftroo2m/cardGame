@@ -1,6 +1,7 @@
 package model
 
 import (
+	"cardGame/ent"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -19,7 +20,7 @@ func NewGameManager() *GameManager {
 func (gm *GameManager) CreateGame(playerID string, conn *websocket.Conn) *Game {
 	gm.mu.Lock()
 	defer gm.mu.Unlock()
-	player := NewPlayer(playerID, 50, 0, 3, map[string]int{}, []Card{}, "")
+	player := NewPlayer(playerID, 50, 0, 3, map[string]int{}, []ent.Card{}, "")
 	game := NewGame(player, conn)
 	gm.games[playerID] = game
 	return game
