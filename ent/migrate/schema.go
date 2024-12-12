@@ -33,10 +33,12 @@ var (
 	MonstersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeString},
 		{Name: "hp", Type: field.TypeInt},
 		{Name: "block", Type: field.TypeInt},
 		{Name: "power", Type: field.TypeJSON},
-		{Name: "actions", Type: field.TypeJSON},
+		{Name: "action_name", Type: field.TypeJSON},
+		{Name: "action_value", Type: field.TypeJSON},
 		{Name: "image", Type: field.TypeString},
 	}
 	// MonstersTable holds the schema information for the "monsters" table.
@@ -63,7 +65,7 @@ var (
 		{Name: "player_id", Type: field.TypeString, Unique: true},
 		{Name: "cards", Type: field.TypeJSON},
 		{Name: "ladder", Type: field.TypeString},
-		{Name: "player_hp", Type: field.TypeString},
+		{Name: "player_hp", Type: field.TypeInt},
 		{Name: "player_energy", Type: field.TypeInt},
 		{Name: "image", Type: field.TypeString, Nullable: true},
 	}

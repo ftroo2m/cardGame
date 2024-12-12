@@ -25,6 +25,12 @@ func (mc *MonsterCreate) SetName(s string) *MonsterCreate {
 	return mc
 }
 
+// SetType sets the "Type" field.
+func (mc *MonsterCreate) SetType(s string) *MonsterCreate {
+	mc.mutation.SetType(s)
+	return mc
+}
+
 // SetHP sets the "HP" field.
 func (mc *MonsterCreate) SetHP(i int) *MonsterCreate {
 	mc.mutation.SetHP(i)
@@ -43,9 +49,15 @@ func (mc *MonsterCreate) SetPower(m map[string]int) *MonsterCreate {
 	return mc
 }
 
-// SetActions sets the "Actions" field.
-func (mc *MonsterCreate) SetActions(m map[string]int) *MonsterCreate {
-	mc.mutation.SetActions(m)
+// SetActionName sets the "ActionName" field.
+func (mc *MonsterCreate) SetActionName(s []string) *MonsterCreate {
+	mc.mutation.SetActionName(s)
+	return mc
+}
+
+// SetActionValue sets the "ActionValue" field.
+func (mc *MonsterCreate) SetActionValue(i []int) *MonsterCreate {
+	mc.mutation.SetActionValue(i)
 	return mc
 }
 
@@ -97,6 +109,14 @@ func (mc *MonsterCreate) check() error {
 			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Monster.Name": %w`, err)}
 		}
 	}
+	if _, ok := mc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "Type", err: errors.New(`ent: missing required field "Monster.Type"`)}
+	}
+	if v, ok := mc.mutation.GetType(); ok {
+		if err := monster.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Monster.Type": %w`, err)}
+		}
+	}
 	if _, ok := mc.mutation.HP(); !ok {
 		return &ValidationError{Name: "HP", err: errors.New(`ent: missing required field "Monster.HP"`)}
 	}
@@ -106,8 +126,11 @@ func (mc *MonsterCreate) check() error {
 	if _, ok := mc.mutation.Power(); !ok {
 		return &ValidationError{Name: "Power", err: errors.New(`ent: missing required field "Monster.Power"`)}
 	}
-	if _, ok := mc.mutation.Actions(); !ok {
-		return &ValidationError{Name: "Actions", err: errors.New(`ent: missing required field "Monster.Actions"`)}
+	if _, ok := mc.mutation.ActionName(); !ok {
+		return &ValidationError{Name: "ActionName", err: errors.New(`ent: missing required field "Monster.ActionName"`)}
+	}
+	if _, ok := mc.mutation.ActionValue(); !ok {
+		return &ValidationError{Name: "ActionValue", err: errors.New(`ent: missing required field "Monster.ActionValue"`)}
 	}
 	if _, ok := mc.mutation.Image(); !ok {
 		return &ValidationError{Name: "Image", err: errors.New(`ent: missing required field "Monster.Image"`)}
@@ -142,6 +165,10 @@ func (mc *MonsterCreate) createSpec() (*Monster, *sqlgraph.CreateSpec) {
 		_spec.SetField(monster.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := mc.mutation.GetType(); ok {
+		_spec.SetField(monster.FieldType, field.TypeString, value)
+		_node.Type = value
+	}
 	if value, ok := mc.mutation.HP(); ok {
 		_spec.SetField(monster.FieldHP, field.TypeInt, value)
 		_node.HP = value
@@ -154,9 +181,13 @@ func (mc *MonsterCreate) createSpec() (*Monster, *sqlgraph.CreateSpec) {
 		_spec.SetField(monster.FieldPower, field.TypeJSON, value)
 		_node.Power = value
 	}
-	if value, ok := mc.mutation.Actions(); ok {
-		_spec.SetField(monster.FieldActions, field.TypeJSON, value)
-		_node.Actions = value
+	if value, ok := mc.mutation.ActionName(); ok {
+		_spec.SetField(monster.FieldActionName, field.TypeJSON, value)
+		_node.ActionName = value
+	}
+	if value, ok := mc.mutation.ActionValue(); ok {
+		_spec.SetField(monster.FieldActionValue, field.TypeJSON, value)
+		_node.ActionValue = value
 	}
 	if value, ok := mc.mutation.Image(); ok {
 		_spec.SetField(monster.FieldImage, field.TypeString, value)

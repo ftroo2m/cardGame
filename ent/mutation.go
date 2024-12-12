@@ -1052,21 +1052,25 @@ func (m *CardMutation) ResetEdge(name string) error {
 // MonsterMutation represents an operation that mutates the Monster nodes in the graph.
 type MonsterMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	_Name         *string
-	_HP           *int
-	add_HP        *int
-	_Block        *int
-	add_Block     *int
-	_Power        *map[string]int
-	_Actions      *map[string]int
-	_Image        *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Monster, error)
-	predicates    []predicate.Monster
+	op                 Op
+	typ                string
+	id                 *int
+	_Name              *string
+	_Type              *string
+	_HP                *int
+	add_HP             *int
+	_Block             *int
+	add_Block          *int
+	_Power             *map[string]int
+	_ActionName        *[]string
+	append_ActionName  []string
+	_ActionValue       *[]int
+	append_ActionValue []int
+	_Image             *string
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*Monster, error)
+	predicates         []predicate.Monster
 }
 
 var _ ent.Mutation = (*MonsterMutation)(nil)
@@ -1201,6 +1205,42 @@ func (m *MonsterMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "Name" field.
 func (m *MonsterMutation) ResetName() {
 	m._Name = nil
+}
+
+// SetType sets the "Type" field.
+func (m *MonsterMutation) SetType(s string) {
+	m._Type = &s
+}
+
+// GetType returns the value of the "Type" field in the mutation.
+func (m *MonsterMutation) GetType() (r string, exists bool) {
+	v := m._Type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "Type" field's value of the Monster entity.
+// If the Monster object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonsterMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "Type" field.
+func (m *MonsterMutation) ResetType() {
+	m._Type = nil
 }
 
 // SetHP sets the "HP" field.
@@ -1351,40 +1391,106 @@ func (m *MonsterMutation) ResetPower() {
 	m._Power = nil
 }
 
-// SetActions sets the "Actions" field.
-func (m *MonsterMutation) SetActions(value map[string]int) {
-	m._Actions = &value
+// SetActionName sets the "ActionName" field.
+func (m *MonsterMutation) SetActionName(s []string) {
+	m._ActionName = &s
+	m.append_ActionName = nil
 }
 
-// Actions returns the value of the "Actions" field in the mutation.
-func (m *MonsterMutation) Actions() (r map[string]int, exists bool) {
-	v := m._Actions
+// ActionName returns the value of the "ActionName" field in the mutation.
+func (m *MonsterMutation) ActionName() (r []string, exists bool) {
+	v := m._ActionName
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldActions returns the old "Actions" field's value of the Monster entity.
+// OldActionName returns the old "ActionName" field's value of the Monster entity.
 // If the Monster object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MonsterMutation) OldActions(ctx context.Context) (v map[string]int, err error) {
+func (m *MonsterMutation) OldActionName(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldActions is only allowed on UpdateOne operations")
+		return v, errors.New("OldActionName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldActions requires an ID field in the mutation")
+		return v, errors.New("OldActionName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldActions: %w", err)
+		return v, fmt.Errorf("querying old value for OldActionName: %w", err)
 	}
-	return oldValue.Actions, nil
+	return oldValue.ActionName, nil
 }
 
-// ResetActions resets all changes to the "Actions" field.
-func (m *MonsterMutation) ResetActions() {
-	m._Actions = nil
+// AppendActionName adds s to the "ActionName" field.
+func (m *MonsterMutation) AppendActionName(s []string) {
+	m.append_ActionName = append(m.append_ActionName, s...)
+}
+
+// AppendedActionName returns the list of values that were appended to the "ActionName" field in this mutation.
+func (m *MonsterMutation) AppendedActionName() ([]string, bool) {
+	if len(m.append_ActionName) == 0 {
+		return nil, false
+	}
+	return m.append_ActionName, true
+}
+
+// ResetActionName resets all changes to the "ActionName" field.
+func (m *MonsterMutation) ResetActionName() {
+	m._ActionName = nil
+	m.append_ActionName = nil
+}
+
+// SetActionValue sets the "ActionValue" field.
+func (m *MonsterMutation) SetActionValue(i []int) {
+	m._ActionValue = &i
+	m.append_ActionValue = nil
+}
+
+// ActionValue returns the value of the "ActionValue" field in the mutation.
+func (m *MonsterMutation) ActionValue() (r []int, exists bool) {
+	v := m._ActionValue
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActionValue returns the old "ActionValue" field's value of the Monster entity.
+// If the Monster object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonsterMutation) OldActionValue(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActionValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActionValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActionValue: %w", err)
+	}
+	return oldValue.ActionValue, nil
+}
+
+// AppendActionValue adds i to the "ActionValue" field.
+func (m *MonsterMutation) AppendActionValue(i []int) {
+	m.append_ActionValue = append(m.append_ActionValue, i...)
+}
+
+// AppendedActionValue returns the list of values that were appended to the "ActionValue" field in this mutation.
+func (m *MonsterMutation) AppendedActionValue() ([]int, bool) {
+	if len(m.append_ActionValue) == 0 {
+		return nil, false
+	}
+	return m.append_ActionValue, true
+}
+
+// ResetActionValue resets all changes to the "ActionValue" field.
+func (m *MonsterMutation) ResetActionValue() {
+	m._ActionValue = nil
+	m.append_ActionValue = nil
 }
 
 // SetImage sets the "Image" field.
@@ -1457,9 +1563,12 @@ func (m *MonsterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MonsterMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m._Name != nil {
 		fields = append(fields, monster.FieldName)
+	}
+	if m._Type != nil {
+		fields = append(fields, monster.FieldType)
 	}
 	if m._HP != nil {
 		fields = append(fields, monster.FieldHP)
@@ -1470,8 +1579,11 @@ func (m *MonsterMutation) Fields() []string {
 	if m._Power != nil {
 		fields = append(fields, monster.FieldPower)
 	}
-	if m._Actions != nil {
-		fields = append(fields, monster.FieldActions)
+	if m._ActionName != nil {
+		fields = append(fields, monster.FieldActionName)
+	}
+	if m._ActionValue != nil {
+		fields = append(fields, monster.FieldActionValue)
 	}
 	if m._Image != nil {
 		fields = append(fields, monster.FieldImage)
@@ -1486,14 +1598,18 @@ func (m *MonsterMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case monster.FieldName:
 		return m.Name()
+	case monster.FieldType:
+		return m.GetType()
 	case monster.FieldHP:
 		return m.HP()
 	case monster.FieldBlock:
 		return m.Block()
 	case monster.FieldPower:
 		return m.Power()
-	case monster.FieldActions:
-		return m.Actions()
+	case monster.FieldActionName:
+		return m.ActionName()
+	case monster.FieldActionValue:
+		return m.ActionValue()
 	case monster.FieldImage:
 		return m.Image()
 	}
@@ -1507,14 +1623,18 @@ func (m *MonsterMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case monster.FieldName:
 		return m.OldName(ctx)
+	case monster.FieldType:
+		return m.OldType(ctx)
 	case monster.FieldHP:
 		return m.OldHP(ctx)
 	case monster.FieldBlock:
 		return m.OldBlock(ctx)
 	case monster.FieldPower:
 		return m.OldPower(ctx)
-	case monster.FieldActions:
-		return m.OldActions(ctx)
+	case monster.FieldActionName:
+		return m.OldActionName(ctx)
+	case monster.FieldActionValue:
+		return m.OldActionValue(ctx)
 	case monster.FieldImage:
 		return m.OldImage(ctx)
 	}
@@ -1532,6 +1652,13 @@ func (m *MonsterMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case monster.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
 		return nil
 	case monster.FieldHP:
 		v, ok := value.(int)
@@ -1554,12 +1681,19 @@ func (m *MonsterMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPower(v)
 		return nil
-	case monster.FieldActions:
-		v, ok := value.(map[string]int)
+	case monster.FieldActionName:
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetActions(v)
+		m.SetActionName(v)
+		return nil
+	case monster.FieldActionValue:
+		v, ok := value.([]int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActionValue(v)
 		return nil
 	case monster.FieldImage:
 		v, ok := value.(string)
@@ -1647,6 +1781,9 @@ func (m *MonsterMutation) ResetField(name string) error {
 	case monster.FieldName:
 		m.ResetName()
 		return nil
+	case monster.FieldType:
+		m.ResetType()
+		return nil
 	case monster.FieldHP:
 		m.ResetHP()
 		return nil
@@ -1656,8 +1793,11 @@ func (m *MonsterMutation) ResetField(name string) error {
 	case monster.FieldPower:
 		m.ResetPower()
 		return nil
-	case monster.FieldActions:
-		m.ResetActions()
+	case monster.FieldActionName:
+		m.ResetActionName()
+		return nil
+	case monster.FieldActionValue:
+		m.ResetActionValue()
 		return nil
 	case monster.FieldImage:
 		m.ResetImage()
@@ -2104,7 +2244,8 @@ type UserConfigMutation struct {
 	cards           *[]string
 	appendcards     []string
 	ladder          *string
-	playerHP        *string
+	playerHP        *int
+	addplayerHP     *int
 	playerEnergy    *int
 	addplayerEnergy *int
 	image           *string
@@ -2336,12 +2477,13 @@ func (m *UserConfigMutation) ResetLadder() {
 }
 
 // SetPlayerHP sets the "playerHP" field.
-func (m *UserConfigMutation) SetPlayerHP(s string) {
-	m.playerHP = &s
+func (m *UserConfigMutation) SetPlayerHP(i int) {
+	m.playerHP = &i
+	m.addplayerHP = nil
 }
 
 // PlayerHP returns the value of the "playerHP" field in the mutation.
-func (m *UserConfigMutation) PlayerHP() (r string, exists bool) {
+func (m *UserConfigMutation) PlayerHP() (r int, exists bool) {
 	v := m.playerHP
 	if v == nil {
 		return
@@ -2352,7 +2494,7 @@ func (m *UserConfigMutation) PlayerHP() (r string, exists bool) {
 // OldPlayerHP returns the old "playerHP" field's value of the UserConfig entity.
 // If the UserConfig object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserConfigMutation) OldPlayerHP(ctx context.Context) (v string, err error) {
+func (m *UserConfigMutation) OldPlayerHP(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPlayerHP is only allowed on UpdateOne operations")
 	}
@@ -2366,9 +2508,28 @@ func (m *UserConfigMutation) OldPlayerHP(ctx context.Context) (v string, err err
 	return oldValue.PlayerHP, nil
 }
 
+// AddPlayerHP adds i to the "playerHP" field.
+func (m *UserConfigMutation) AddPlayerHP(i int) {
+	if m.addplayerHP != nil {
+		*m.addplayerHP += i
+	} else {
+		m.addplayerHP = &i
+	}
+}
+
+// AddedPlayerHP returns the value that was added to the "playerHP" field in this mutation.
+func (m *UserConfigMutation) AddedPlayerHP() (r int, exists bool) {
+	v := m.addplayerHP
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetPlayerHP resets all changes to the "playerHP" field.
 func (m *UserConfigMutation) ResetPlayerHP() {
 	m.playerHP = nil
+	m.addplayerHP = nil
 }
 
 // SetPlayerEnergy sets the "playerEnergy" field.
@@ -2601,7 +2762,7 @@ func (m *UserConfigMutation) SetField(name string, value ent.Value) error {
 		m.SetLadder(v)
 		return nil
 	case userconfig.FieldPlayerHP:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2629,6 +2790,9 @@ func (m *UserConfigMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UserConfigMutation) AddedFields() []string {
 	var fields []string
+	if m.addplayerHP != nil {
+		fields = append(fields, userconfig.FieldPlayerHP)
+	}
 	if m.addplayerEnergy != nil {
 		fields = append(fields, userconfig.FieldPlayerEnergy)
 	}
@@ -2640,6 +2804,8 @@ func (m *UserConfigMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UserConfigMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case userconfig.FieldPlayerHP:
+		return m.AddedPlayerHP()
 	case userconfig.FieldPlayerEnergy:
 		return m.AddedPlayerEnergy()
 	}
@@ -2651,6 +2817,13 @@ func (m *UserConfigMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserConfigMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case userconfig.FieldPlayerHP:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlayerHP(v)
+		return nil
 	case userconfig.FieldPlayerEnergy:
 		v, ok := value.(int)
 		if !ok {

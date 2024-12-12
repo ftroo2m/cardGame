@@ -26,6 +26,10 @@ func init() {
 	monsterDescName := monsterFields[0].Descriptor()
 	// monster.NameValidator is a validator for the "Name" field. It is called by the builders before save.
 	monster.NameValidator = monsterDescName.Validators[0].(func(string) error)
+	// monsterDescType is the schema descriptor for Type field.
+	monsterDescType := monsterFields[1].Descriptor()
+	// monster.TypeValidator is a validator for the "Type" field. It is called by the builders before save.
+	monster.TypeValidator = monsterDescType.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.
@@ -46,8 +50,4 @@ func init() {
 	userconfigDescLadder := userconfigFields[2].Descriptor()
 	// userconfig.LadderValidator is a validator for the "ladder" field. It is called by the builders before save.
 	userconfig.LadderValidator = userconfigDescLadder.Validators[0].(func(string) error)
-	// userconfigDescPlayerHP is the schema descriptor for playerHP field.
-	userconfigDescPlayerHP := userconfigFields[3].Descriptor()
-	// userconfig.PlayerHPValidator is a validator for the "playerHP" field. It is called by the builders before save.
-	userconfig.PlayerHPValidator = userconfigDescPlayerHP.Validators[0].(func(string) error)
 }

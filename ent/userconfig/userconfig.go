@@ -53,8 +53,6 @@ var (
 	PlayerIDValidator func(string) error
 	// LadderValidator is a validator for the "ladder" field. It is called by the builders before save.
 	LadderValidator func(string) error
-	// PlayerHPValidator is a validator for the "playerHP" field. It is called by the builders before save.
-	PlayerHPValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the UserConfig queries.

@@ -24,7 +24,7 @@ type UserConfig struct {
 	// Ladder holds the value of the "ladder" field.
 	Ladder string `json:"ladder,omitempty"`
 	// PlayerHP holds the value of the "playerHP" field.
-	PlayerHP string `json:"playerHP,omitempty"`
+	PlayerHP int `json:"playerHP,omitempty"`
 	// PlayerEnergy holds the value of the "playerEnergy" field.
 	PlayerEnergy int `json:"playerEnergy,omitempty"`
 	// Image holds the value of the "image" field.
@@ -39,9 +39,9 @@ func (*UserConfig) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case userconfig.FieldCards:
 			values[i] = new([]byte)
-		case userconfig.FieldID, userconfig.FieldPlayerEnergy:
+		case userconfig.FieldID, userconfig.FieldPlayerHP, userconfig.FieldPlayerEnergy:
 			values[i] = new(sql.NullInt64)
-		case userconfig.FieldPlayerID, userconfig.FieldLadder, userconfig.FieldPlayerHP, userconfig.FieldImage:
+		case userconfig.FieldPlayerID, userconfig.FieldLadder, userconfig.FieldImage:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -85,10 +85,10 @@ func (uc *UserConfig) assignValues(columns []string, values []any) error {
 				uc.Ladder = value.String
 			}
 		case userconfig.FieldPlayerHP:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field playerHP", values[i])
 			} else if value.Valid {
-				uc.PlayerHP = value.String
+				uc.PlayerHP = int(value.Int64)
 			}
 		case userconfig.FieldPlayerEnergy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -148,7 +148,7 @@ func (uc *UserConfig) String() string {
 	builder.WriteString(uc.Ladder)
 	builder.WriteString(", ")
 	builder.WriteString("playerHP=")
-	builder.WriteString(uc.PlayerHP)
+	builder.WriteString(fmt.Sprintf("%v", uc.PlayerHP))
 	builder.WriteString(", ")
 	builder.WriteString("playerEnergy=")
 	builder.WriteString(fmt.Sprintf("%v", uc.PlayerEnergy))

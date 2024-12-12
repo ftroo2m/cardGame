@@ -69,16 +69,23 @@ func (ucu *UserConfigUpdate) SetNillableLadder(s *string) *UserConfigUpdate {
 }
 
 // SetPlayerHP sets the "playerHP" field.
-func (ucu *UserConfigUpdate) SetPlayerHP(s string) *UserConfigUpdate {
-	ucu.mutation.SetPlayerHP(s)
+func (ucu *UserConfigUpdate) SetPlayerHP(i int) *UserConfigUpdate {
+	ucu.mutation.ResetPlayerHP()
+	ucu.mutation.SetPlayerHP(i)
 	return ucu
 }
 
 // SetNillablePlayerHP sets the "playerHP" field if the given value is not nil.
-func (ucu *UserConfigUpdate) SetNillablePlayerHP(s *string) *UserConfigUpdate {
-	if s != nil {
-		ucu.SetPlayerHP(*s)
+func (ucu *UserConfigUpdate) SetNillablePlayerHP(i *int) *UserConfigUpdate {
+	if i != nil {
+		ucu.SetPlayerHP(*i)
 	}
+	return ucu
+}
+
+// AddPlayerHP adds i to the "playerHP" field.
+func (ucu *UserConfigUpdate) AddPlayerHP(i int) *UserConfigUpdate {
+	ucu.mutation.AddPlayerHP(i)
 	return ucu
 }
 
@@ -167,11 +174,6 @@ func (ucu *UserConfigUpdate) check() error {
 			return &ValidationError{Name: "ladder", err: fmt.Errorf(`ent: validator failed for field "UserConfig.ladder": %w`, err)}
 		}
 	}
-	if v, ok := ucu.mutation.PlayerHP(); ok {
-		if err := userconfig.PlayerHPValidator(v); err != nil {
-			return &ValidationError{Name: "playerHP", err: fmt.Errorf(`ent: validator failed for field "UserConfig.playerHP": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -202,7 +204,10 @@ func (ucu *UserConfigUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(userconfig.FieldLadder, field.TypeString, value)
 	}
 	if value, ok := ucu.mutation.PlayerHP(); ok {
-		_spec.SetField(userconfig.FieldPlayerHP, field.TypeString, value)
+		_spec.SetField(userconfig.FieldPlayerHP, field.TypeInt, value)
+	}
+	if value, ok := ucu.mutation.AddedPlayerHP(); ok {
+		_spec.AddField(userconfig.FieldPlayerHP, field.TypeInt, value)
 	}
 	if value, ok := ucu.mutation.PlayerEnergy(); ok {
 		_spec.SetField(userconfig.FieldPlayerEnergy, field.TypeInt, value)
@@ -277,16 +282,23 @@ func (ucuo *UserConfigUpdateOne) SetNillableLadder(s *string) *UserConfigUpdateO
 }
 
 // SetPlayerHP sets the "playerHP" field.
-func (ucuo *UserConfigUpdateOne) SetPlayerHP(s string) *UserConfigUpdateOne {
-	ucuo.mutation.SetPlayerHP(s)
+func (ucuo *UserConfigUpdateOne) SetPlayerHP(i int) *UserConfigUpdateOne {
+	ucuo.mutation.ResetPlayerHP()
+	ucuo.mutation.SetPlayerHP(i)
 	return ucuo
 }
 
 // SetNillablePlayerHP sets the "playerHP" field if the given value is not nil.
-func (ucuo *UserConfigUpdateOne) SetNillablePlayerHP(s *string) *UserConfigUpdateOne {
-	if s != nil {
-		ucuo.SetPlayerHP(*s)
+func (ucuo *UserConfigUpdateOne) SetNillablePlayerHP(i *int) *UserConfigUpdateOne {
+	if i != nil {
+		ucuo.SetPlayerHP(*i)
 	}
+	return ucuo
+}
+
+// AddPlayerHP adds i to the "playerHP" field.
+func (ucuo *UserConfigUpdateOne) AddPlayerHP(i int) *UserConfigUpdateOne {
+	ucuo.mutation.AddPlayerHP(i)
 	return ucuo
 }
 
@@ -388,11 +400,6 @@ func (ucuo *UserConfigUpdateOne) check() error {
 			return &ValidationError{Name: "ladder", err: fmt.Errorf(`ent: validator failed for field "UserConfig.ladder": %w`, err)}
 		}
 	}
-	if v, ok := ucuo.mutation.PlayerHP(); ok {
-		if err := userconfig.PlayerHPValidator(v); err != nil {
-			return &ValidationError{Name: "playerHP", err: fmt.Errorf(`ent: validator failed for field "UserConfig.playerHP": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -440,7 +447,10 @@ func (ucuo *UserConfigUpdateOne) sqlSave(ctx context.Context) (_node *UserConfig
 		_spec.SetField(userconfig.FieldLadder, field.TypeString, value)
 	}
 	if value, ok := ucuo.mutation.PlayerHP(); ok {
-		_spec.SetField(userconfig.FieldPlayerHP, field.TypeString, value)
+		_spec.SetField(userconfig.FieldPlayerHP, field.TypeInt, value)
+	}
+	if value, ok := ucuo.mutation.AddedPlayerHP(); ok {
+		_spec.AddField(userconfig.FieldPlayerHP, field.TypeInt, value)
 	}
 	if value, ok := ucuo.mutation.PlayerEnergy(); ok {
 		_spec.SetField(userconfig.FieldPlayerEnergy, field.TypeInt, value)

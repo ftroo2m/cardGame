@@ -19,14 +19,18 @@ type Monster struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
+	// Type holds the value of the "Type" field.
+	Type string `json:"Type,omitempty"`
 	// HP holds the value of the "HP" field.
 	HP int `json:"HP,omitempty"`
 	// Block holds the value of the "Block" field.
 	Block int `json:"Block,omitempty"`
 	// Power holds the value of the "Power" field.
 	Power map[string]int `json:"Power,omitempty"`
-	// Actions holds the value of the "Actions" field.
-	Actions map[string]int `json:"Actions,omitempty"`
+	// ActionName holds the value of the "ActionName" field.
+	ActionName []string `json:"ActionName,omitempty"`
+	// ActionValue holds the value of the "ActionValue" field.
+	ActionValue []int `json:"ActionValue,omitempty"`
 	// Image holds the value of the "Image" field.
 	Image        string `json:"Image,omitempty"`
 	selectValues sql.SelectValues
@@ -37,11 +41,11 @@ func (*Monster) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case monster.FieldPower, monster.FieldActions:
+		case monster.FieldPower, monster.FieldActionName, monster.FieldActionValue:
 			values[i] = new([]byte)
 		case monster.FieldID, monster.FieldHP, monster.FieldBlock:
 			values[i] = new(sql.NullInt64)
-		case monster.FieldName, monster.FieldImage:
+		case monster.FieldName, monster.FieldType, monster.FieldImage:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -70,6 +74,12 @@ func (m *Monster) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.Name = value.String
 			}
+		case monster.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field Type", values[i])
+			} else if value.Valid {
+				m.Type = value.String
+			}
 		case monster.FieldHP:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field HP", values[i])
@@ -90,12 +100,20 @@ func (m *Monster) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field Power: %w", err)
 				}
 			}
-		case monster.FieldActions:
+		case monster.FieldActionName:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field Actions", values[i])
+				return fmt.Errorf("unexpected type %T for field ActionName", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &m.Actions); err != nil {
-					return fmt.Errorf("unmarshal field Actions: %w", err)
+				if err := json.Unmarshal(*value, &m.ActionName); err != nil {
+					return fmt.Errorf("unmarshal field ActionName: %w", err)
+				}
+			}
+		case monster.FieldActionValue:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ActionValue", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &m.ActionValue); err != nil {
+					return fmt.Errorf("unmarshal field ActionValue: %w", err)
 				}
 			}
 		case monster.FieldImage:
@@ -143,6 +161,9 @@ func (m *Monster) String() string {
 	builder.WriteString("Name=")
 	builder.WriteString(m.Name)
 	builder.WriteString(", ")
+	builder.WriteString("Type=")
+	builder.WriteString(m.Type)
+	builder.WriteString(", ")
 	builder.WriteString("HP=")
 	builder.WriteString(fmt.Sprintf("%v", m.HP))
 	builder.WriteString(", ")
@@ -152,8 +173,11 @@ func (m *Monster) String() string {
 	builder.WriteString("Power=")
 	builder.WriteString(fmt.Sprintf("%v", m.Power))
 	builder.WriteString(", ")
-	builder.WriteString("Actions=")
-	builder.WriteString(fmt.Sprintf("%v", m.Actions))
+	builder.WriteString("ActionName=")
+	builder.WriteString(fmt.Sprintf("%v", m.ActionName))
+	builder.WriteString(", ")
+	builder.WriteString("ActionValue=")
+	builder.WriteString(fmt.Sprintf("%v", m.ActionValue))
 	builder.WriteString(", ")
 	builder.WriteString("Image=")
 	builder.WriteString(m.Image)

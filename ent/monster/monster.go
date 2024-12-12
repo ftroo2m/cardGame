@@ -13,14 +13,18 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldHP holds the string denoting the hp field in the database.
 	FieldHP = "hp"
 	// FieldBlock holds the string denoting the block field in the database.
 	FieldBlock = "block"
 	// FieldPower holds the string denoting the power field in the database.
 	FieldPower = "power"
-	// FieldActions holds the string denoting the actions field in the database.
-	FieldActions = "actions"
+	// FieldActionName holds the string denoting the actionname field in the database.
+	FieldActionName = "action_name"
+	// FieldActionValue holds the string denoting the actionvalue field in the database.
+	FieldActionValue = "action_value"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
 	// Table holds the table name of the monster in the database.
@@ -31,10 +35,12 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldType,
 	FieldHP,
 	FieldBlock,
 	FieldPower,
-	FieldActions,
+	FieldActionName,
+	FieldActionValue,
 	FieldImage,
 }
 
@@ -51,6 +57,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "Name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// TypeValidator is a validator for the "Type" field. It is called by the builders before save.
+	TypeValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Monster queries.
@@ -64,6 +72,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the Name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByType orders the results by the Type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByHP orders the results by the HP field.

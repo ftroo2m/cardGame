@@ -58,6 +58,11 @@ func Name(v string) predicate.Monster {
 	return predicate.Monster(sql.FieldEQ(FieldName, v))
 }
 
+// Type applies equality check predicate on the "Type" field. It's identical to TypeEQ.
+func Type(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldEQ(FieldType, v))
+}
+
 // HP applies equality check predicate on the "HP" field. It's identical to HPEQ.
 func HP(v int) predicate.Monster {
 	return predicate.Monster(sql.FieldEQ(FieldHP, v))
@@ -136,6 +141,71 @@ func NameEqualFold(v string) predicate.Monster {
 // NameContainsFold applies the ContainsFold predicate on the "Name" field.
 func NameContainsFold(v string) predicate.Monster {
 	return predicate.Monster(sql.FieldContainsFold(FieldName, v))
+}
+
+// TypeEQ applies the EQ predicate on the "Type" field.
+func TypeEQ(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "Type" field.
+func TypeNEQ(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "Type" field.
+func TypeIn(vs ...string) predicate.Monster {
+	return predicate.Monster(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "Type" field.
+func TypeNotIn(vs ...string) predicate.Monster {
+	return predicate.Monster(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "Type" field.
+func TypeGT(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "Type" field.
+func TypeGTE(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "Type" field.
+func TypeLT(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "Type" field.
+func TypeLTE(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldLTE(FieldType, v))
+}
+
+// TypeContains applies the Contains predicate on the "Type" field.
+func TypeContains(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldContains(FieldType, v))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "Type" field.
+func TypeHasPrefix(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldHasPrefix(FieldType, v))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "Type" field.
+func TypeHasSuffix(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldHasSuffix(FieldType, v))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "Type" field.
+func TypeEqualFold(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldEqualFold(FieldType, v))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "Type" field.
+func TypeContainsFold(v string) predicate.Monster {
+	return predicate.Monster(sql.FieldContainsFold(FieldType, v))
 }
 
 // HPEQ applies the EQ predicate on the "HP" field.

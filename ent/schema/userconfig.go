@@ -18,8 +18,7 @@ func (UserConfig) Fields() []ent.Field {
 		field.Strings("cards"),
 		field.String("ladder").
 			NotEmpty(),
-		field.String("playerHP").
-			NotEmpty(),
+		field.Int("playerHP"),
 		field.Int("playerEnergy"),
 		field.String("image").
 			Optional(),

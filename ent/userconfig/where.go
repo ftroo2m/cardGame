@@ -64,7 +64,7 @@ func Ladder(v string) predicate.UserConfig {
 }
 
 // PlayerHP applies equality check predicate on the "playerHP" field. It's identical to PlayerHPEQ.
-func PlayerHP(v string) predicate.UserConfig {
+func PlayerHP(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldEQ(FieldPlayerHP, v))
 }
 
@@ -209,68 +209,43 @@ func LadderContainsFold(v string) predicate.UserConfig {
 }
 
 // PlayerHPEQ applies the EQ predicate on the "playerHP" field.
-func PlayerHPEQ(v string) predicate.UserConfig {
+func PlayerHPEQ(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldEQ(FieldPlayerHP, v))
 }
 
 // PlayerHPNEQ applies the NEQ predicate on the "playerHP" field.
-func PlayerHPNEQ(v string) predicate.UserConfig {
+func PlayerHPNEQ(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldNEQ(FieldPlayerHP, v))
 }
 
 // PlayerHPIn applies the In predicate on the "playerHP" field.
-func PlayerHPIn(vs ...string) predicate.UserConfig {
+func PlayerHPIn(vs ...int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldIn(FieldPlayerHP, vs...))
 }
 
 // PlayerHPNotIn applies the NotIn predicate on the "playerHP" field.
-func PlayerHPNotIn(vs ...string) predicate.UserConfig {
+func PlayerHPNotIn(vs ...int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldNotIn(FieldPlayerHP, vs...))
 }
 
 // PlayerHPGT applies the GT predicate on the "playerHP" field.
-func PlayerHPGT(v string) predicate.UserConfig {
+func PlayerHPGT(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldGT(FieldPlayerHP, v))
 }
 
 // PlayerHPGTE applies the GTE predicate on the "playerHP" field.
-func PlayerHPGTE(v string) predicate.UserConfig {
+func PlayerHPGTE(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldGTE(FieldPlayerHP, v))
 }
 
 // PlayerHPLT applies the LT predicate on the "playerHP" field.
-func PlayerHPLT(v string) predicate.UserConfig {
+func PlayerHPLT(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldLT(FieldPlayerHP, v))
 }
 
 // PlayerHPLTE applies the LTE predicate on the "playerHP" field.
-func PlayerHPLTE(v string) predicate.UserConfig {
+func PlayerHPLTE(v int) predicate.UserConfig {
 	return predicate.UserConfig(sql.FieldLTE(FieldPlayerHP, v))
-}
-
-// PlayerHPContains applies the Contains predicate on the "playerHP" field.
-func PlayerHPContains(v string) predicate.UserConfig {
-	return predicate.UserConfig(sql.FieldContains(FieldPlayerHP, v))
-}
-
-// PlayerHPHasPrefix applies the HasPrefix predicate on the "playerHP" field.
-func PlayerHPHasPrefix(v string) predicate.UserConfig {
-	return predicate.UserConfig(sql.FieldHasPrefix(FieldPlayerHP, v))
-}
-
-// PlayerHPHasSuffix applies the HasSuffix predicate on the "playerHP" field.
-func PlayerHPHasSuffix(v string) predicate.UserConfig {
-	return predicate.UserConfig(sql.FieldHasSuffix(FieldPlayerHP, v))
-}
-
-// PlayerHPEqualFold applies the EqualFold predicate on the "playerHP" field.
-func PlayerHPEqualFold(v string) predicate.UserConfig {
-	return predicate.UserConfig(sql.FieldEqualFold(FieldPlayerHP, v))
-}
-
-// PlayerHPContainsFold applies the ContainsFold predicate on the "playerHP" field.
-func PlayerHPContainsFold(v string) predicate.UserConfig {
-	return predicate.UserConfig(sql.FieldContainsFold(FieldPlayerHP, v))
 }
 
 // PlayerEnergyEQ applies the EQ predicate on the "playerEnergy" field.

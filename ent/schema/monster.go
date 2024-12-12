@@ -16,6 +16,7 @@ func (Monster) Fields() []ent.Field {
 	return []ent.Field{
 		// Name field with type string and not empty constraint.
 		field.String("Name").NotEmpty().Unique(),
+		field.String("Type").NotEmpty(),
 		// HP field with type int.
 		field.Int("HP"),
 		// Block field with type int.
@@ -25,7 +26,8 @@ func (Monster) Fields() []ent.Field {
 		field.JSON("Power", map[string]int{}),
 		// Actions field with type map[string]int.
 		// Note: Ent does not support map fields directly, so you might need to use JSON or a custom type.
-		field.JSON("Actions", map[string]int{}),
+		field.JSON("ActionName", []string{}),
+		field.JSON("ActionValue", []int{}),
 		// Image field with type string.
 		field.String("Image"),
 	}

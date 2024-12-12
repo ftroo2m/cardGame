@@ -38,8 +38,8 @@ func (ucc *UserConfigCreate) SetLadder(s string) *UserConfigCreate {
 }
 
 // SetPlayerHP sets the "playerHP" field.
-func (ucc *UserConfigCreate) SetPlayerHP(s string) *UserConfigCreate {
-	ucc.mutation.SetPlayerHP(s)
+func (ucc *UserConfigCreate) SetPlayerHP(i int) *UserConfigCreate {
+	ucc.mutation.SetPlayerHP(i)
 	return ucc
 }
 
@@ -119,11 +119,6 @@ func (ucc *UserConfigCreate) check() error {
 	if _, ok := ucc.mutation.PlayerHP(); !ok {
 		return &ValidationError{Name: "playerHP", err: errors.New(`ent: missing required field "UserConfig.playerHP"`)}
 	}
-	if v, ok := ucc.mutation.PlayerHP(); ok {
-		if err := userconfig.PlayerHPValidator(v); err != nil {
-			return &ValidationError{Name: "playerHP", err: fmt.Errorf(`ent: validator failed for field "UserConfig.playerHP": %w`, err)}
-		}
-	}
 	if _, ok := ucc.mutation.PlayerEnergy(); !ok {
 		return &ValidationError{Name: "playerEnergy", err: errors.New(`ent: missing required field "UserConfig.playerEnergy"`)}
 	}
@@ -166,7 +161,7 @@ func (ucc *UserConfigCreate) createSpec() (*UserConfig, *sqlgraph.CreateSpec) {
 		_node.Ladder = value
 	}
 	if value, ok := ucc.mutation.PlayerHP(); ok {
-		_spec.SetField(userconfig.FieldPlayerHP, field.TypeString, value)
+		_spec.SetField(userconfig.FieldPlayerHP, field.TypeInt, value)
 		_node.PlayerHP = value
 	}
 	if value, ok := ucc.mutation.PlayerEnergy(); ok {

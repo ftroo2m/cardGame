@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,6 +38,20 @@ func (mu *MonsterUpdate) SetName(s string) *MonsterUpdate {
 func (mu *MonsterUpdate) SetNillableName(s *string) *MonsterUpdate {
 	if s != nil {
 		mu.SetName(*s)
+	}
+	return mu
+}
+
+// SetType sets the "Type" field.
+func (mu *MonsterUpdate) SetType(s string) *MonsterUpdate {
+	mu.mutation.SetType(s)
+	return mu
+}
+
+// SetNillableType sets the "Type" field if the given value is not nil.
+func (mu *MonsterUpdate) SetNillableType(s *string) *MonsterUpdate {
+	if s != nil {
+		mu.SetType(*s)
 	}
 	return mu
 }
@@ -89,9 +104,27 @@ func (mu *MonsterUpdate) SetPower(m map[string]int) *MonsterUpdate {
 	return mu
 }
 
-// SetActions sets the "Actions" field.
-func (mu *MonsterUpdate) SetActions(m map[string]int) *MonsterUpdate {
-	mu.mutation.SetActions(m)
+// SetActionName sets the "ActionName" field.
+func (mu *MonsterUpdate) SetActionName(s []string) *MonsterUpdate {
+	mu.mutation.SetActionName(s)
+	return mu
+}
+
+// AppendActionName appends s to the "ActionName" field.
+func (mu *MonsterUpdate) AppendActionName(s []string) *MonsterUpdate {
+	mu.mutation.AppendActionName(s)
+	return mu
+}
+
+// SetActionValue sets the "ActionValue" field.
+func (mu *MonsterUpdate) SetActionValue(i []int) *MonsterUpdate {
+	mu.mutation.SetActionValue(i)
+	return mu
+}
+
+// AppendActionValue appends i to the "ActionValue" field.
+func (mu *MonsterUpdate) AppendActionValue(i []int) *MonsterUpdate {
+	mu.mutation.AppendActionValue(i)
 	return mu
 }
 
@@ -148,6 +181,11 @@ func (mu *MonsterUpdate) check() error {
 			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Monster.Name": %w`, err)}
 		}
 	}
+	if v, ok := mu.mutation.GetType(); ok {
+		if err := monster.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Monster.Type": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -166,6 +204,9 @@ func (mu *MonsterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.Name(); ok {
 		_spec.SetField(monster.FieldName, field.TypeString, value)
 	}
+	if value, ok := mu.mutation.GetType(); ok {
+		_spec.SetField(monster.FieldType, field.TypeString, value)
+	}
 	if value, ok := mu.mutation.HP(); ok {
 		_spec.SetField(monster.FieldHP, field.TypeInt, value)
 	}
@@ -181,8 +222,21 @@ func (mu *MonsterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.Power(); ok {
 		_spec.SetField(monster.FieldPower, field.TypeJSON, value)
 	}
-	if value, ok := mu.mutation.Actions(); ok {
-		_spec.SetField(monster.FieldActions, field.TypeJSON, value)
+	if value, ok := mu.mutation.ActionName(); ok {
+		_spec.SetField(monster.FieldActionName, field.TypeJSON, value)
+	}
+	if value, ok := mu.mutation.AppendedActionName(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, monster.FieldActionName, value)
+		})
+	}
+	if value, ok := mu.mutation.ActionValue(); ok {
+		_spec.SetField(monster.FieldActionValue, field.TypeJSON, value)
+	}
+	if value, ok := mu.mutation.AppendedActionValue(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, monster.FieldActionValue, value)
+		})
 	}
 	if value, ok := mu.mutation.Image(); ok {
 		_spec.SetField(monster.FieldImage, field.TypeString, value)
@@ -217,6 +271,20 @@ func (muo *MonsterUpdateOne) SetName(s string) *MonsterUpdateOne {
 func (muo *MonsterUpdateOne) SetNillableName(s *string) *MonsterUpdateOne {
 	if s != nil {
 		muo.SetName(*s)
+	}
+	return muo
+}
+
+// SetType sets the "Type" field.
+func (muo *MonsterUpdateOne) SetType(s string) *MonsterUpdateOne {
+	muo.mutation.SetType(s)
+	return muo
+}
+
+// SetNillableType sets the "Type" field if the given value is not nil.
+func (muo *MonsterUpdateOne) SetNillableType(s *string) *MonsterUpdateOne {
+	if s != nil {
+		muo.SetType(*s)
 	}
 	return muo
 }
@@ -269,9 +337,27 @@ func (muo *MonsterUpdateOne) SetPower(m map[string]int) *MonsterUpdateOne {
 	return muo
 }
 
-// SetActions sets the "Actions" field.
-func (muo *MonsterUpdateOne) SetActions(m map[string]int) *MonsterUpdateOne {
-	muo.mutation.SetActions(m)
+// SetActionName sets the "ActionName" field.
+func (muo *MonsterUpdateOne) SetActionName(s []string) *MonsterUpdateOne {
+	muo.mutation.SetActionName(s)
+	return muo
+}
+
+// AppendActionName appends s to the "ActionName" field.
+func (muo *MonsterUpdateOne) AppendActionName(s []string) *MonsterUpdateOne {
+	muo.mutation.AppendActionName(s)
+	return muo
+}
+
+// SetActionValue sets the "ActionValue" field.
+func (muo *MonsterUpdateOne) SetActionValue(i []int) *MonsterUpdateOne {
+	muo.mutation.SetActionValue(i)
+	return muo
+}
+
+// AppendActionValue appends i to the "ActionValue" field.
+func (muo *MonsterUpdateOne) AppendActionValue(i []int) *MonsterUpdateOne {
+	muo.mutation.AppendActionValue(i)
 	return muo
 }
 
@@ -341,6 +427,11 @@ func (muo *MonsterUpdateOne) check() error {
 			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Monster.Name": %w`, err)}
 		}
 	}
+	if v, ok := muo.mutation.GetType(); ok {
+		if err := monster.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Monster.Type": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -376,6 +467,9 @@ func (muo *MonsterUpdateOne) sqlSave(ctx context.Context) (_node *Monster, err e
 	if value, ok := muo.mutation.Name(); ok {
 		_spec.SetField(monster.FieldName, field.TypeString, value)
 	}
+	if value, ok := muo.mutation.GetType(); ok {
+		_spec.SetField(monster.FieldType, field.TypeString, value)
+	}
 	if value, ok := muo.mutation.HP(); ok {
 		_spec.SetField(monster.FieldHP, field.TypeInt, value)
 	}
@@ -391,8 +485,21 @@ func (muo *MonsterUpdateOne) sqlSave(ctx context.Context) (_node *Monster, err e
 	if value, ok := muo.mutation.Power(); ok {
 		_spec.SetField(monster.FieldPower, field.TypeJSON, value)
 	}
-	if value, ok := muo.mutation.Actions(); ok {
-		_spec.SetField(monster.FieldActions, field.TypeJSON, value)
+	if value, ok := muo.mutation.ActionName(); ok {
+		_spec.SetField(monster.FieldActionName, field.TypeJSON, value)
+	}
+	if value, ok := muo.mutation.AppendedActionName(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, monster.FieldActionName, value)
+		})
+	}
+	if value, ok := muo.mutation.ActionValue(); ok {
+		_spec.SetField(monster.FieldActionValue, field.TypeJSON, value)
+	}
+	if value, ok := muo.mutation.AppendedActionValue(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, monster.FieldActionValue, value)
+		})
 	}
 	if value, ok := muo.mutation.Image(); ok {
 		_spec.SetField(monster.FieldImage, field.TypeString, value)
