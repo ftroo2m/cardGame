@@ -3,7 +3,6 @@ package model
 import (
 	"cardGame/config"
 	"cardGame/ent"
-	"cardGame/internal/pkg/common"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -14,11 +13,11 @@ import (
 type Game struct {
 	Player             *Player
 	Monster            *ent.Monster
-	Cards              []ent.Card
-	UsedCards          []ent.Card
+	Cards              []string
+	UsedCards          []string
 	PlayerConn         *websocket.Conn
 	rng                *rand.Rand // 随机数生成器
-	monsterActionIndex int
+	MonsterActionIndex int
 	NewCards           []string
 }
 
@@ -29,11 +28,11 @@ func (g *Game) DrawCard(num int) {
 	for i := 0; i < num; i++ {
 		if len(g.Cards) == 0 {
 			g.Cards = g.UsedCards
-			g.UsedCards = []ent.Card{}
+			g.UsedCards = []string{}
 		}
 		index := g.rng.Intn(len(g.Cards))
 		selectedCard := g.Cards[index]
-		g.NewCards = append(g.NewCards, selectedCard.Name)
+		g.NewCards = append(g.NewCards, selectedCard)
 		g.Cards = append(g.Cards[:index], g.Cards[index+1:]...)
 		g.Player.Cards = append(g.Player.Cards, selectedCard)
 	}
@@ -43,15 +42,15 @@ func NewGame(player *Player, monster *ent.Monster, conn *websocket.Conn) *Game {
 	return &Game{
 		Player:     player,
 		Monster:    monster,
-		Cards:      []ent.Card{},
-		UsedCards:  []ent.Card{},
+		Cards:      []string{},
+		UsedCards:  []string{},
 		PlayerConn: conn,
 		rng:        rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
 func (g *Game) Run() {
-	g.monsterActionIndex = 0
+	g.MonsterActionIndex = 0
 	for {
 		_, message, err := g.PlayerConn.ReadMessage()
 		if err != nil {
@@ -75,7 +74,7 @@ func (g *Game) Run() {
 }
 
 func (g *Game) exit() {
-	config.GameManager.RemoveGame(g.Player.ID)
+	GameManagerUse.RemoveGame(g.Player.ID)
 }
 
 func (g *Game) useCard(msg Message) {
@@ -83,31 +82,31 @@ func (g *Game) useCard(msg Message) {
 	card := config.CardList[cardName]
 	g.Player.Energy -= card.Energy
 	g.Player.Block += card.Block
-	common.DamageCalculateToMonster(g.Player, g.Monster, card.Damage)
+	DamageCalculateToMonster(g.Player, g.Monster, card.Damage)
 	for _, action := range card.Action {
 		switch action {
 		case "removePlayerDebuffs":
-			common.RemovePlayerDebuffs(g.Player)
+			RemovePlayerDebuffs(g.Player)
 		case "addRegenEqualToAllDamage":
-			common.AddRegenToDamage(g.Player, g.Monster, 2)
+			AddRegenToDamage(g.Player, g.Monster, 2)
 		case "removeHealth":
-			common.RemoveHealth(g.Player, 2)
+			RemoveHealth(g.Player, 2)
 		case "dealDamageEqualToBlock":
-			common.DealDamageEqualToBlock(g.Player, g.Monster)
+			DealDamageEqualToBlock(g.Player, g.Monster)
 		case "drawCards":
-			common.DrawCards(g, 1)
+			DrawCards(g, 1)
 		case "addEnergy":
-			common.AddEnergyToPlayer(g.Player, 1)
+			AddEnergyToPlayer(g.Player, 1)
 		}
 	}
 
 	for power, num := range card.Power {
-		common.PowerCause(g.Player, g.Monster, power, num, 1)
+		PowerCause(g.Player, g.Monster, power, num, 1)
 	}
-	g.UsedCards = append(g.UsedCards, card)
+	g.UsedCards = append(g.UsedCards, card.Name)
 	index := 0
-	for i, c := range g.Player.Cards {
-		if c.Name == cardName {
+	for i, name := range g.Player.Cards {
+		if name == cardName {
 			index = i
 			break
 		}
@@ -135,26 +134,26 @@ func (g *Game) init() {
 }
 
 func (g *Game) endRound() {
-	common.PowerCalculateMonster(g.Monster)
-	action := g.Monster.ActionName[g.monsterActionIndex]
+	PowerCalculateMonster(g.Monster)
+	action := g.Monster.ActionName[g.MonsterActionIndex]
 	switch action {
 	case "damage":
-		common.DamageCalculateToPlayer(g.Player, g.Monster, g.Monster.ActionValue[g.monsterActionIndex])
+		DamageCalculateToPlayer(g.Player, g.Monster, g.Monster.ActionValue[g.MonsterActionIndex])
 	case "block":
-		g.Monster.Block += g.Monster.ActionValue[g.monsterActionIndex]
+		g.Monster.Block += g.Monster.ActionValue[g.MonsterActionIndex]
 	case "weak":
-		g.Player.Power["weak"] += g.Monster.ActionValue[g.monsterActionIndex]
+		g.Player.Power["weak"] += g.Monster.ActionValue[g.MonsterActionIndex]
 	case "vulnerable":
-		g.Player.Power["vulnerable"] += g.Monster.ActionValue[g.monsterActionIndex]
+		g.Player.Power["vulnerable"] += g.Monster.ActionValue[g.MonsterActionIndex]
 	}
-	common.PowerCalculatePlayer(g.Player)
-
+	PowerCalculatePlayer(g.Player)
+	g.DrawCard(1)
 	if g.Monster.HP <= 0 {
 		g.monsterDeath()
 	} else if g.Player.HP <= 0 {
 		g.playerDeath()
 	} else {
-		g.monsterActionIndex = (g.monsterActionIndex + 1) % len(g.Monster.ActionName)
+		g.MonsterActionIndex = (g.MonsterActionIndex + 1) % len(g.Monster.ActionName)
 		g.returnMessage("endRound")
 	}
 }
@@ -179,8 +178,8 @@ func (g *Game) returnMessage(code string) {
 		HP:          g.Monster.HP,
 		Block:       g.Monster.Block,
 		Power:       g.Monster.Power,
-		ActionName:  g.Monster.ActionName[g.monsterActionIndex],
-		ActionValue: g.Monster.ActionValue[g.monsterActionIndex],
+		ActionName:  g.Monster.ActionName[g.MonsterActionIndex],
+		ActionValue: g.Monster.ActionValue[g.MonsterActionIndex],
 	}
 	m.Name = code
 	js, _ := json.Marshal(m)

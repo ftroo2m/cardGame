@@ -1,11 +1,10 @@
-package common
+package model
 
 import (
 	"cardGame/ent"
-	"cardGame/internal/model"
 )
 
-func DamageCalculateToMonster(player *model.Player, monster *ent.Monster, origin int) int {
+func DamageCalculateToMonster(player *Player, monster *ent.Monster, origin int) int {
 	if origin == 0 {
 		return 0
 	}
@@ -29,7 +28,7 @@ func DamageCalculateToMonster(player *model.Player, monster *ent.Monster, origin
 	}
 }
 
-func DamageCalculateToPlayer(player *model.Player, monster *ent.Monster, origin int) int {
+func DamageCalculateToPlayer(player *Player, monster *ent.Monster, origin int) int {
 	// 计算怪物对玩家造成的伤害
 
 	if origin == 0 {

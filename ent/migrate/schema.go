@@ -29,6 +29,18 @@ var (
 		Columns:    CardsColumns,
 		PrimaryKey: []*schema.Column{CardsColumns[0]},
 	}
+	// LeaderboardsColumns holds the columns for the "leaderboards" table.
+	LeaderboardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "player_id", Type: field.TypeString, Unique: true},
+		{Name: "counts", Type: field.TypeInt},
+	}
+	// LeaderboardsTable holds the schema information for the "leaderboards" table.
+	LeaderboardsTable = &schema.Table{
+		Name:       "leaderboards",
+		Columns:    LeaderboardsColumns,
+		PrimaryKey: []*schema.Column{LeaderboardsColumns[0]},
+	}
 	// MonstersColumns holds the columns for the "monsters" table.
 	MonstersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -78,6 +90,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CardsTable,
+		LeaderboardsTable,
 		MonstersTable,
 		UsersTable,
 		UserConfigsTable,

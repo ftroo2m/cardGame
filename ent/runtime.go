@@ -4,6 +4,7 @@ package ent
 
 import (
 	"cardGame/ent/card"
+	"cardGame/ent/leaderboard"
 	"cardGame/ent/monster"
 	"cardGame/ent/schema"
 	"cardGame/ent/user"
@@ -20,6 +21,12 @@ func init() {
 	cardDescName := cardFields[0].Descriptor()
 	// card.NameValidator is a validator for the "Name" field. It is called by the builders before save.
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
+	leaderboardFields := schema.Leaderboard{}.Fields()
+	_ = leaderboardFields
+	// leaderboardDescPlayerID is the schema descriptor for playerID field.
+	leaderboardDescPlayerID := leaderboardFields[0].Descriptor()
+	// leaderboard.PlayerIDValidator is a validator for the "playerID" field. It is called by the builders before save.
+	leaderboard.PlayerIDValidator = leaderboardDescPlayerID.Validators[0].(func(string) error)
 	monsterFields := schema.Monster{}.Fields()
 	_ = monsterFields
 	// monsterDescName is the schema descriptor for Name field.

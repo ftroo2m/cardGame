@@ -20,6 +20,18 @@ func (f CardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CardMutation", m)
 }
 
+// The LeaderboardFunc type is an adapter to allow the use of ordinary
+// function as Leaderboard mutator.
+type LeaderboardFunc func(context.Context, *ent.LeaderboardMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LeaderboardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LeaderboardMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LeaderboardMutation", m)
+}
+
 // The MonsterFunc type is an adapter to allow the use of ordinary
 // function as Monster mutator.
 type MonsterFunc func(context.Context, *ent.MonsterMutation) (ent.Value, error)

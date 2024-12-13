@@ -1,7 +1,7 @@
 package handles
 
 import (
-	"cardGame/config"
+	"cardGame/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -9,7 +9,7 @@ import (
 )
 
 type StartGameRequest struct {
-	Monster string `json:"monster"`
+	Room int `json:"room"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -36,5 +36,5 @@ func StartGame(c *gin.Context) {
 		log.Println("Failed to upgrade to WebSocket:", err)
 		return
 	}
-	config.GameManager.CreateGame(playerID, req.Monster, conn)
+	model.GameManagerUse.CreateGame(playerID, req.Room, conn)
 }

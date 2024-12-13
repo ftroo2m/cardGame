@@ -1,38 +1,37 @@
-package common
+package model
 
 import (
 	"cardGame/ent"
-	"cardGame/internal/model"
 )
 
-func DealDamageEqualToBlock(player *model.Player, monster *ent.Monster) {
+func DealDamageEqualToBlock(player *Player, monster *ent.Monster) {
 	monster.HP -= DamageCalculateToMonster(player, monster, player.Block)
 }
 
-func DrawCards(game *model.Game, num int) {
+func DrawCards(game *Game, num int) {
 	game.DrawCard(num)
 }
 
-func AddEnergyToPlayer(player *model.Player, energy int) {
+func AddEnergyToPlayer(player *Player, energy int) {
 	player.Energy += energy
 }
 
-func RemovePlayerDebuffs(player *model.Player) {
+func RemovePlayerDebuffs(player *Player) {
 	player.Power["weak"] = 0
 	player.Power["vulnerable"] = 0
 	player.Power["poison"] = 0
 }
 
-func RemoveHealth(player *model.Player, damage int) {
+func RemoveHealth(player *Player, damage int) {
 	player.HP -= damage
 }
 
-func AddRegenToDamage(player *model.Player, monster *ent.Monster, damage int) {
+func AddRegenToDamage(player *Player, monster *ent.Monster, damage int) {
 	player.Power["regen"] += damage
 	monster.HP -= DamageCalculateToMonster(player, monster, damage)
 }
 
-func PowerCause(player *model.Player, monster *ent.Monster, power string, num int, goal int) {
+func PowerCause(player *Player, monster *ent.Monster, power string, num int, goal int) {
 	if goal == 1 {
 		switch power {
 		case "regen":
@@ -62,7 +61,7 @@ func PowerCause(player *model.Player, monster *ent.Monster, power string, num in
 	}
 }
 
-func PowerCalculatePlayer(player *model.Player) {
+func PowerCalculatePlayer(player *Player) {
 	if player.Power["regen"] != 0 {
 		player.HP += player.Power["regen"]
 		player.Power["regen"] -= 1

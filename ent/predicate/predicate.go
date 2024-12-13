@@ -9,6 +9,9 @@ import (
 // Card is the predicate function for card builders.
 type Card func(*sql.Selector)
 
+// Leaderboard is the predicate function for leaderboard builders.
+type Leaderboard func(*sql.Selector)
+
 // Monster is the predicate function for monster builders.
 type Monster func(*sql.Selector)
 

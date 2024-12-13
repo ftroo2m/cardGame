@@ -4,6 +4,7 @@ package ent
 
 import (
 	"cardGame/ent/card"
+	"cardGame/ent/leaderboard"
 	"cardGame/ent/monster"
 	"cardGame/ent/predicate"
 	"cardGame/ent/user"
@@ -26,10 +27,11 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCard       = "Card"
-	TypeMonster    = "Monster"
-	TypeUser       = "User"
-	TypeUserConfig = "UserConfig"
+	TypeCard        = "Card"
+	TypeLeaderboard = "Leaderboard"
+	TypeMonster     = "Monster"
+	TypeUser        = "User"
+	TypeUserConfig  = "UserConfig"
 )
 
 // CardMutation represents an operation that mutates the Card nodes in the graph.
@@ -1047,6 +1049,422 @@ func (m *CardMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CardMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Card edge %s", name)
+}
+
+// LeaderboardMutation represents an operation that mutates the Leaderboard nodes in the graph.
+type LeaderboardMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	playerID      *string
+	counts        *int
+	addcounts     *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Leaderboard, error)
+	predicates    []predicate.Leaderboard
+}
+
+var _ ent.Mutation = (*LeaderboardMutation)(nil)
+
+// leaderboardOption allows management of the mutation configuration using functional options.
+type leaderboardOption func(*LeaderboardMutation)
+
+// newLeaderboardMutation creates new mutation for the Leaderboard entity.
+func newLeaderboardMutation(c config, op Op, opts ...leaderboardOption) *LeaderboardMutation {
+	m := &LeaderboardMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLeaderboard,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLeaderboardID sets the ID field of the mutation.
+func withLeaderboardID(id int) leaderboardOption {
+	return func(m *LeaderboardMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Leaderboard
+		)
+		m.oldValue = func(ctx context.Context) (*Leaderboard, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Leaderboard.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLeaderboard sets the old Leaderboard of the mutation.
+func withLeaderboard(node *Leaderboard) leaderboardOption {
+	return func(m *LeaderboardMutation) {
+		m.oldValue = func(context.Context) (*Leaderboard, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LeaderboardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LeaderboardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LeaderboardMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LeaderboardMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Leaderboard.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPlayerID sets the "playerID" field.
+func (m *LeaderboardMutation) SetPlayerID(s string) {
+	m.playerID = &s
+}
+
+// PlayerID returns the value of the "playerID" field in the mutation.
+func (m *LeaderboardMutation) PlayerID() (r string, exists bool) {
+	v := m.playerID
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlayerID returns the old "playerID" field's value of the Leaderboard entity.
+// If the Leaderboard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardMutation) OldPlayerID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlayerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlayerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlayerID: %w", err)
+	}
+	return oldValue.PlayerID, nil
+}
+
+// ResetPlayerID resets all changes to the "playerID" field.
+func (m *LeaderboardMutation) ResetPlayerID() {
+	m.playerID = nil
+}
+
+// SetCounts sets the "counts" field.
+func (m *LeaderboardMutation) SetCounts(i int) {
+	m.counts = &i
+	m.addcounts = nil
+}
+
+// Counts returns the value of the "counts" field in the mutation.
+func (m *LeaderboardMutation) Counts() (r int, exists bool) {
+	v := m.counts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCounts returns the old "counts" field's value of the Leaderboard entity.
+// If the Leaderboard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardMutation) OldCounts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCounts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCounts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCounts: %w", err)
+	}
+	return oldValue.Counts, nil
+}
+
+// AddCounts adds i to the "counts" field.
+func (m *LeaderboardMutation) AddCounts(i int) {
+	if m.addcounts != nil {
+		*m.addcounts += i
+	} else {
+		m.addcounts = &i
+	}
+}
+
+// AddedCounts returns the value that was added to the "counts" field in this mutation.
+func (m *LeaderboardMutation) AddedCounts() (r int, exists bool) {
+	v := m.addcounts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCounts resets all changes to the "counts" field.
+func (m *LeaderboardMutation) ResetCounts() {
+	m.counts = nil
+	m.addcounts = nil
+}
+
+// Where appends a list predicates to the LeaderboardMutation builder.
+func (m *LeaderboardMutation) Where(ps ...predicate.Leaderboard) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LeaderboardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LeaderboardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Leaderboard, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LeaderboardMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LeaderboardMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Leaderboard).
+func (m *LeaderboardMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LeaderboardMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.playerID != nil {
+		fields = append(fields, leaderboard.FieldPlayerID)
+	}
+	if m.counts != nil {
+		fields = append(fields, leaderboard.FieldCounts)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LeaderboardMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case leaderboard.FieldPlayerID:
+		return m.PlayerID()
+	case leaderboard.FieldCounts:
+		return m.Counts()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LeaderboardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case leaderboard.FieldPlayerID:
+		return m.OldPlayerID(ctx)
+	case leaderboard.FieldCounts:
+		return m.OldCounts(ctx)
+	}
+	return nil, fmt.Errorf("unknown Leaderboard field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LeaderboardMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case leaderboard.FieldPlayerID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlayerID(v)
+		return nil
+	case leaderboard.FieldCounts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCounts(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Leaderboard field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LeaderboardMutation) AddedFields() []string {
+	var fields []string
+	if m.addcounts != nil {
+		fields = append(fields, leaderboard.FieldCounts)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LeaderboardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case leaderboard.FieldCounts:
+		return m.AddedCounts()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LeaderboardMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case leaderboard.FieldCounts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCounts(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Leaderboard numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LeaderboardMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LeaderboardMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LeaderboardMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Leaderboard nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LeaderboardMutation) ResetField(name string) error {
+	switch name {
+	case leaderboard.FieldPlayerID:
+		m.ResetPlayerID()
+		return nil
+	case leaderboard.FieldCounts:
+		m.ResetCounts()
+		return nil
+	}
+	return fmt.Errorf("unknown Leaderboard field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LeaderboardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LeaderboardMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LeaderboardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LeaderboardMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LeaderboardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LeaderboardMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LeaderboardMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Leaderboard unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LeaderboardMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Leaderboard edge %s", name)
 }
 
 // MonsterMutation represents an operation that mutates the Monster nodes in the graph.

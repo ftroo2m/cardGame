@@ -12,6 +12,7 @@ import (
 	"cardGame/ent/migrate"
 
 	"cardGame/ent/card"
+	"cardGame/ent/leaderboard"
 	"cardGame/ent/monster"
 	"cardGame/ent/user"
 	"cardGame/ent/userconfig"
@@ -28,6 +29,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
+	// Leaderboard is the client for interacting with the Leaderboard builders.
+	Leaderboard *LeaderboardClient
 	// Monster is the client for interacting with the Monster builders.
 	Monster *MonsterClient
 	// User is the client for interacting with the User builders.
@@ -46,6 +49,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Card = NewCardClient(c.config)
+	c.Leaderboard = NewLeaderboardClient(c.config)
 	c.Monster = NewMonsterClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserConfig = NewUserConfigClient(c.config)
@@ -139,12 +143,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Card:       NewCardClient(cfg),
-		Monster:    NewMonsterClient(cfg),
-		User:       NewUserClient(cfg),
-		UserConfig: NewUserConfigClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Card:        NewCardClient(cfg),
+		Leaderboard: NewLeaderboardClient(cfg),
+		Monster:     NewMonsterClient(cfg),
+		User:        NewUserClient(cfg),
+		UserConfig:  NewUserConfigClient(cfg),
 	}, nil
 }
 
@@ -162,12 +167,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:        ctx,
-		config:     cfg,
-		Card:       NewCardClient(cfg),
-		Monster:    NewMonsterClient(cfg),
-		User:       NewUserClient(cfg),
-		UserConfig: NewUserConfigClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Card:        NewCardClient(cfg),
+		Leaderboard: NewLeaderboardClient(cfg),
+		Monster:     NewMonsterClient(cfg),
+		User:        NewUserClient(cfg),
+		UserConfig:  NewUserConfigClient(cfg),
 	}, nil
 }
 
@@ -197,6 +203,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Card.Use(hooks...)
+	c.Leaderboard.Use(hooks...)
 	c.Monster.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserConfig.Use(hooks...)
@@ -206,6 +213,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Card.Intercept(interceptors...)
+	c.Leaderboard.Intercept(interceptors...)
 	c.Monster.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 	c.UserConfig.Intercept(interceptors...)
@@ -216,6 +224,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CardMutation:
 		return c.Card.mutate(ctx, m)
+	case *LeaderboardMutation:
+		return c.Leaderboard.mutate(ctx, m)
 	case *MonsterMutation:
 		return c.Monster.mutate(ctx, m)
 	case *UserMutation:
@@ -357,6 +367,139 @@ func (c *CardClient) mutate(ctx context.Context, m *CardMutation) (Value, error)
 		return (&CardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Card mutation op: %q", m.Op())
+	}
+}
+
+// LeaderboardClient is a client for the Leaderboard schema.
+type LeaderboardClient struct {
+	config
+}
+
+// NewLeaderboardClient returns a client for the Leaderboard from the given config.
+func NewLeaderboardClient(c config) *LeaderboardClient {
+	return &LeaderboardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `leaderboard.Hooks(f(g(h())))`.
+func (c *LeaderboardClient) Use(hooks ...Hook) {
+	c.hooks.Leaderboard = append(c.hooks.Leaderboard, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `leaderboard.Intercept(f(g(h())))`.
+func (c *LeaderboardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Leaderboard = append(c.inters.Leaderboard, interceptors...)
+}
+
+// Create returns a builder for creating a Leaderboard entity.
+func (c *LeaderboardClient) Create() *LeaderboardCreate {
+	mutation := newLeaderboardMutation(c.config, OpCreate)
+	return &LeaderboardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Leaderboard entities.
+func (c *LeaderboardClient) CreateBulk(builders ...*LeaderboardCreate) *LeaderboardCreateBulk {
+	return &LeaderboardCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LeaderboardClient) MapCreateBulk(slice any, setFunc func(*LeaderboardCreate, int)) *LeaderboardCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LeaderboardCreateBulk{err: fmt.Errorf("calling to LeaderboardClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LeaderboardCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LeaderboardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Leaderboard.
+func (c *LeaderboardClient) Update() *LeaderboardUpdate {
+	mutation := newLeaderboardMutation(c.config, OpUpdate)
+	return &LeaderboardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LeaderboardClient) UpdateOne(l *Leaderboard) *LeaderboardUpdateOne {
+	mutation := newLeaderboardMutation(c.config, OpUpdateOne, withLeaderboard(l))
+	return &LeaderboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LeaderboardClient) UpdateOneID(id int) *LeaderboardUpdateOne {
+	mutation := newLeaderboardMutation(c.config, OpUpdateOne, withLeaderboardID(id))
+	return &LeaderboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Leaderboard.
+func (c *LeaderboardClient) Delete() *LeaderboardDelete {
+	mutation := newLeaderboardMutation(c.config, OpDelete)
+	return &LeaderboardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LeaderboardClient) DeleteOne(l *Leaderboard) *LeaderboardDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LeaderboardClient) DeleteOneID(id int) *LeaderboardDeleteOne {
+	builder := c.Delete().Where(leaderboard.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LeaderboardDeleteOne{builder}
+}
+
+// Query returns a query builder for Leaderboard.
+func (c *LeaderboardClient) Query() *LeaderboardQuery {
+	return &LeaderboardQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLeaderboard},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Leaderboard entity by its id.
+func (c *LeaderboardClient) Get(ctx context.Context, id int) (*Leaderboard, error) {
+	return c.Query().Where(leaderboard.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LeaderboardClient) GetX(ctx context.Context, id int) *Leaderboard {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LeaderboardClient) Hooks() []Hook {
+	return c.hooks.Leaderboard
+}
+
+// Interceptors returns the client interceptors.
+func (c *LeaderboardClient) Interceptors() []Interceptor {
+	return c.inters.Leaderboard
+}
+
+func (c *LeaderboardClient) mutate(ctx context.Context, m *LeaderboardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LeaderboardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LeaderboardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LeaderboardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LeaderboardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Leaderboard mutation op: %q", m.Op())
 	}
 }
 
@@ -762,9 +905,9 @@ func (c *UserConfigClient) mutate(ctx context.Context, m *UserConfigMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Card, Monster, User, UserConfig []ent.Hook
+		Card, Leaderboard, Monster, User, UserConfig []ent.Hook
 	}
 	inters struct {
-		Card, Monster, User, UserConfig []ent.Interceptor
+		Card, Leaderboard, Monster, User, UserConfig []ent.Interceptor
 	}
 )

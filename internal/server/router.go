@@ -24,8 +24,6 @@ func Init(e *gin.Engine) {
 	g.POST("/start/game", handles.StartGame)
 	g.POST("/map", handles.Map)
 	g.POST("/c/rest", handles.Rest)
-	g.POST("/c/up", handles.Up)
-	g.POST("/c/down", handles.Down)
 	g.POST("/win", handles.Win)
 	//g.POST("/archive", handles.Archive)
 }

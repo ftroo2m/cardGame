@@ -4,6 +4,7 @@ package ent
 
 import (
 	"cardGame/ent/card"
+	"cardGame/ent/leaderboard"
 	"cardGame/ent/monster"
 	"cardGame/ent/user"
 	"cardGame/ent/userconfig"
@@ -76,10 +77,11 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			card.Table:       card.ValidColumn,
-			monster.Table:    monster.ValidColumn,
-			user.Table:       user.ValidColumn,
-			userconfig.Table: userconfig.ValidColumn,
+			card.Table:        card.ValidColumn,
+			leaderboard.Table: leaderboard.ValidColumn,
+			monster.Table:     monster.ValidColumn,
+			user.Table:        user.ValidColumn,
+			userconfig.Table:  userconfig.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

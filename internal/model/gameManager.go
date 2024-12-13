@@ -2,9 +2,9 @@ package model
 
 import (
 	"cardGame/config"
-	"cardGame/ent"
 	"cardGame/ent/userconfig"
 	"context"
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -14,23 +14,24 @@ type GameManager struct {
 	mu    sync.Mutex
 }
 
+var GameManagerUse = NewGameManager()
+
 func NewGameManager() *GameManager {
 	return &GameManager{
 		games: make(map[string]*Game),
 	}
 }
 
-func (gm *GameManager) CreateGame(playerID string, monsterName string, conn *websocket.Conn) {
+func (gm *GameManager) CreateGame(playerID string, room int, conn *websocket.Conn) {
 	gm.mu.Lock()
 	defer gm.mu.Unlock()
 	var player *Player
 	userconfig, _ := config.SqlClient.UserConfig.Query().Where(userconfig.PlayerID(playerID)).First(context.Background())
-	if userconfig == nil {
-		player = NewPlayer(playerID, 50, 0, 3, map[string]int{}, []ent.Card{}, "")
-	} else {
-		player = NewPlayer(playerID, userconfig.PlayerHP, 0, 3, map[string]int{}, []ent.Card{}, "")
-	}
-	monster := config.MonsterList[monsterName]
+	player = NewPlayer(playerID, userconfig.PlayerHP, 0, 3, map[string]int{}, []string{}, "")
+	var nodes []Node
+	json.Unmarshal([]byte(userconfig.Ladder), &nodes)
+
+	monster := config.MonsterList[nodes[room].Name]
 	game := NewGame(player, &monster, conn)
 	gm.games[playerID] = game
 	go game.Run()
