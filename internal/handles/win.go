@@ -4,6 +4,7 @@ import (
 	"cardGame/config"
 	"cardGame/ent/leaderboard"
 	"cardGame/ent/userconfig"
+	"cardGame/internal/model"
 	"cardGame/internal/util"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ func Win(c *gin.Context) {
 	} else {
 		config.SqlClient.Leaderboard.Update().Where(leaderboard.PlayerID(cookieValue)).SetCounts(player.Counts + 1).Save(context.Background())
 	}
-	way := util.GetWay()
+	way := model.GetWay()
 	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
 	config.SqlClient.UserConfig.Delete().Where(userconfig.PlayerID(cookieValue)).Exec(context.Background())
 	config.SqlClient.UserConfig.Create().SetPlayerID(cookieValue).SetPlayerHP(72).SetPlayerEnergy(3).SetLadder(way).SetCards(initialHand).SetPlayerID(cookieValue).Save(context.Background())

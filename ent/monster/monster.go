@@ -14,17 +14,17 @@ const (
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
+	FieldType = "Type"
 	// FieldHP holds the string denoting the hp field in the database.
-	FieldHP = "hp"
+	FieldHP = "HP"
 	// FieldBlock holds the string denoting the block field in the database.
 	FieldBlock = "block"
 	// FieldPower holds the string denoting the power field in the database.
 	FieldPower = "power"
 	// FieldActionName holds the string denoting the actionname field in the database.
-	FieldActionName = "action_name"
+	FieldActionName = "actionName"
 	// FieldActionValue holds the string denoting the actionvalue field in the database.
-	FieldActionValue = "action_value"
+	FieldActionValue = "actionValue"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
 	// Table holds the table name of the monster in the database.

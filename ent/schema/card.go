@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
 
@@ -10,30 +12,36 @@ type Card struct {
 	ent.Schema
 }
 
+func (Card) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "cards"},
+	}
+}
+
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("Name").NotEmpty().Unique(),
+		field.String("Name").StorageKey("name").NotEmpty().Unique(),
 		// Type field with type string.
-		field.String("Type"),
+		field.String("Type").StorageKey("type"),
 		// Energy field with type int.
-		field.Int("Energy"),
+		field.Int("Energy").StorageKey("energy"),
 		// Target field with type string.
-		field.String("Target"),
+		field.String("Target").StorageKey("target"),
 		// Block field with type int.
-		field.Int("Block"),
+		field.Int("Block").StorageKey("block"),
 		// Damage field with type int.
-		field.Int("Damage"),
+		field.Int("Damage").StorageKey("damage"),
 		// Power field with type map[string]int, stored as JSON.
-		field.JSON("Power", map[string]int{}),
+		field.JSON("Power", map[string]int{}).StorageKey("power"),
 		// Action field with type []string, stored as JSON.
-		field.JSON("Action", []string{}),
+		field.JSON("Action", []string{}).StorageKey("action"),
 		// Description field with type string.
-		field.String("Description"),
+		field.String("Description").StorageKey("description"),
 		// Image field with type string.
-		field.String("Image"),
+		field.String("Image").StorageKey("image"),
 		// Upgrade field with type int.
-		field.Int("Upgrade"),
+		field.Int("Upgrade").StorageKey("upgrade"),
 	}
 }
 

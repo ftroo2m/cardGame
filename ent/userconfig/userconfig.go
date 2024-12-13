@@ -12,19 +12,19 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 	// FieldPlayerID holds the string denoting the playerid field in the database.
-	FieldPlayerID = "player_id"
+	FieldPlayerID = "playerID"
 	// FieldCards holds the string denoting the cards field in the database.
 	FieldCards = "cards"
 	// FieldLadder holds the string denoting the ladder field in the database.
 	FieldLadder = "ladder"
 	// FieldPlayerHP holds the string denoting the playerhp field in the database.
-	FieldPlayerHP = "player_hp"
+	FieldPlayerHP = "playerHP"
 	// FieldPlayerEnergy holds the string denoting the playerenergy field in the database.
-	FieldPlayerEnergy = "player_energy"
+	FieldPlayerEnergy = "playerEnergy"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
 	// Table holds the table name of the userconfig in the database.
-	Table = "user_configs"
+	Table = "userconfigs"
 )
 
 // Columns holds all SQL columns for userconfig fields.

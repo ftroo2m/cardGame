@@ -12,7 +12,7 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 	// FieldPlayerID holds the string denoting the playerid field in the database.
-	FieldPlayerID = "player_id"
+	FieldPlayerID = "playerID"
 	// FieldCounts holds the string denoting the counts field in the database.
 	FieldCounts = "counts"
 	// Table holds the table name of the leaderboard in the database.

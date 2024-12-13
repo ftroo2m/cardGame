@@ -3,6 +3,7 @@ package handles
 import (
 	"cardGame/config"
 	"cardGame/ent/user"
+	"cardGame/internal/model"
 	"cardGame/internal/util"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -56,15 +57,20 @@ func Register(c *gin.Context) {
 		util.ErrorResp(c, err, http.StatusBadRequest, true)
 		return
 	}
-	_, err = config.SqlClient.
-		User.Create().SetUsername(req.Username).SetPassword(req.Password).Save(context.Background())
+	u, _ := config.SqlClient.
+		User.Query().Where(user.Username(req.Username)).First(context.Background())
+	if u != nil {
+		util.ErrorResp(c, err, 401, true)
+	}
+	way := model.GetWay()
+	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
+	_, err = config.SqlClient.UserConfig.Create().SetPlayerID(req.Username).SetPlayerHP(72).SetPlayerEnergy(3).SetLadder(way).SetCards(initialHand).Save(context.Background())
 	if err != nil {
 		panic(err)
 		util.ErrorResp(c, err, 401, true)
 	}
-	way := util.GetWay()
-	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
-	_, err = config.SqlClient.UserConfig.Create().SetPlayerID(req.Username).SetPlayerHP(72).SetPlayerEnergy(3).SetLadder(way).SetCards(initialHand).SetPlayerID(req.Username).Save(context.Background())
+	_, err = config.SqlClient.
+		User.Create().SetUsername(req.Username).SetPassword(req.Password).Save(context.Background())
 	if err != nil {
 		panic(err)
 		util.ErrorResp(c, err, 401, true)

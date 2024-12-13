@@ -3,10 +3,15 @@ package model
 import (
 	"cardGame/config"
 	"cardGame/ent"
+	"cardGame/ent/monster"
+	"cardGame/ent/userconfig"
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -122,6 +127,24 @@ func (g *Game) useCard(msg Message) {
 }
 
 func (g *Game) monsterDeath() {
+	usercf, _ := config.SqlClient.UserConfig.Query().Where(userconfig.PlayerID(g.Player.ID)).First(context.Background())
+	var nodes []Node
+	json.Unmarshal([]byte(usercf.Ladder), &nodes)
+	for i := 0; i < len(nodes); i++ {
+		if nodes[i].Name == g.Monster.Name {
+			nodes[i].Visit = 1
+			break
+		}
+	}
+	jsonWay, _ := json.Marshal(nodes)
+	keys := make([]string, 0, len(config.CardList))
+	for key := range config.CardList {
+		keys = append(keys, key)
+	}
+	randomKey := keys[g.rng.Intn(len(keys))]
+	randomCard := config.CardList[randomKey].Name
+	usercf.Cards = append(usercf.Cards, randomCard)
+	config.SqlClient.UserConfig.UpdateOneID(usercf.ID).SetLadder(string(jsonWay)).SetCards(usercf.Cards).Save(context.Background())
 	m := newMessage("monsterDeath")
 	js, _ := json.Marshal(m)
 	g.PlayerConn.WriteMessage(websocket.TextMessage, js)
@@ -159,6 +182,10 @@ func (g *Game) endRound() {
 }
 
 func (g *Game) playerDeath() {
+	_, _ = config.SqlClient.UserConfig.Delete().Where(userconfig.PlayerID(g.Player.ID)).Exec(context.Background())
+	way := GetWay()
+	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
+	config.SqlClient.UserConfig.Create().SetPlayerID(g.Player.ID).SetPlayerHP(72).SetPlayerEnergy(3).SetLadder(way).SetCards(initialHand).Save(context.Background())
 	m := newMessage("playerDeath")
 	js, _ := json.Marshal(m)
 	g.PlayerConn.WriteMessage(websocket.TextMessage, js)
@@ -184,4 +211,230 @@ func (g *Game) returnMessage(code string) {
 	m.Name = code
 	js, _ := json.Marshal(m)
 	g.PlayerConn.WriteMessage(websocket.TextMessage, js)
+}
+
+func DealDamageEqualToBlock(player *Player, monster *ent.Monster) {
+	monster.HP -= DamageCalculateToMonster(player, monster, player.Block)
+}
+
+func DrawCards(game *Game, num int) {
+	game.DrawCard(num)
+}
+
+func AddEnergyToPlayer(player *Player, energy int) {
+	player.Energy += energy
+}
+
+func RemovePlayerDebuffs(player *Player) {
+	player.Power["weak"] = 0
+	player.Power["vulnerable"] = 0
+	player.Power["poison"] = 0
+}
+
+func RemoveHealth(player *Player, damage int) {
+	player.HP -= damage
+}
+
+func AddRegenToDamage(player *Player, monster *ent.Monster, damage int) {
+	player.Power["regen"] += damage
+	monster.HP -= DamageCalculateToMonster(player, monster, damage)
+}
+
+func PowerCause(player *Player, monster *ent.Monster, power string, num int, goal int) {
+	if goal == 1 {
+		switch power {
+		case "regen":
+			player.Power["regen"] += num
+		case "strength":
+			player.Power["strength"] += num
+		case "weak":
+			monster.Power["weak"] += num
+		case "vulnerable":
+			monster.Power["vulnerable"] += num
+		case "poison":
+			monster.Power["poison"] += num
+		}
+	} else {
+		switch power {
+		case "regen":
+			monster.Power["regen"] += num
+		case "strength":
+			monster.Power["strength"] += num
+		case "weak":
+			player.Power["weak"] += num
+		case "vulnerable":
+			player.Power["vulnerable"] += num
+		case "poison":
+			player.Power["poison"] += num
+		}
+	}
+}
+
+func PowerCalculatePlayer(player *Player) {
+	if player.Power["regen"] != 0 {
+		player.HP += player.Power["regen"]
+		player.Power["regen"] -= 1
+	}
+	if player.Power["poison"] != 0 {
+		player.HP -= player.Power["poison"]
+		player.Power["poison"] -= 1
+	}
+	if player.Power["strength"] != 0 {
+		player.Power["strength"] -= 1
+	}
+	if player.Power["weak"] != 0 {
+		player.Power["weak"] -= 1
+	}
+	if player.Power["vulnerable"] != 0 {
+		player.Power["vulnerable"] -= 1
+	}
+}
+
+func PowerCalculateMonster(monster *ent.Monster) {
+	if monster.Power["regen"] != 0 {
+		monster.HP += monster.Power["regen"]
+		monster.Power["regen"] -= 1
+	}
+	if monster.Power["poison"] != 0 {
+		monster.HP -= monster.Power["poison"]
+		monster.Power["poison"] -= 1
+	}
+	if monster.Power["strength"] != 0 {
+		monster.Power["strength"] -= 1
+	}
+	if monster.Power["weak"] != 0 {
+		monster.Power["weak"] -= 1
+	}
+	if monster.Power["vulnerable"] != 0 {
+		monster.Power["vulnerable"] -= 1
+	}
+}
+
+func DamageCalculateToMonster(player *Player, monster *ent.Monster, origin int) int {
+	if origin == 0 {
+		return 0
+	}
+	// 计算玩家对怪物造成的伤害
+	damage := origin + player.Power["strength"]
+	if monster.Power["vulnerable"] != 0 {
+		damage = int(float64(damage) * 1.5)
+	}
+
+	if player.Power["weak"] != 0 {
+		damage = int(float64(damage) * 0.75)
+	}
+
+	if monster.Block > damage {
+		monster.Block -= damage
+		return 0
+	} else {
+		damage -= monster.Block
+		monster.Block = 0
+		return damage
+	}
+}
+
+func DamageCalculateToPlayer(player *Player, monster *ent.Monster, origin int) int {
+	// 计算怪物对玩家造成的伤害
+
+	if origin == 0 {
+		return 0
+	}
+
+	damage := origin + monster.Power["strength"]
+
+	if player.Power["vulnerable"] != 0 {
+		damage = int(float64(damage) * 1.5)
+	}
+	if monster.Power["weak"] != 0 {
+		damage = int(float64(damage) * 0.75)
+	}
+
+	if player.Block > damage {
+		player.Block -= damage
+		return 0
+	} else {
+		damage -= player.Block
+		player.Block = 0
+		return damage
+	}
+}
+
+func GetWay() string {
+	way := make([]Node, 8)
+	rand.Seed(time.Now().UnixNano())
+	id := [7]int{}
+	p := 0
+	for i := 1; i <= 3; i++ {
+		sid := rand.Intn(5) + 1
+		for j := 1; j < i; j++ {
+			if sid == id[j] {
+				p = 1
+				break
+			}
+		}
+		if p == 1 {
+			i--
+			p = 0
+		} else {
+			id[i] = sid
+		}
+	}
+	for i := 4; i <= 5; i++ {
+		sid := rand.Intn(3) + 7
+		for j := 4; j < i; j++ {
+			if sid == id[j] {
+				p = 1
+				break
+			}
+		}
+		if p == 1 {
+			i--
+			p = 0
+		} else {
+			id[i] = sid
+		}
+	}
+	id[6] = rand.Intn(2) + 10
+	sort.Ints(id[:])
+	for i := 1; i <= 3; i++ {
+		println(id[i])
+		monster, err := config.SqlClient.Monster.Query().Where(monster.ID(id[i])).First(context.Background())
+		if err != nil {
+			fmt.Println("Monster query error:", err)
+			println("monster query error")
+		}
+		println(monster.Name)
+		way[i-1] = Node{
+			ID:    i - 1,
+			Name:  monster.Name,
+			Visit: 0,
+		}
+	}
+	way[3] = Node{
+		ID:    3,
+		Name:  "campfire",
+		Visit: 0,
+	}
+	for i := 4; i <= 5; i++ {
+		monster, _ := config.SqlClient.Monster.Query().Where(monster.ID(id[i])).First(context.Background())
+		way[i] = Node{
+			ID:    i,
+			Name:  monster.Name,
+			Visit: 0,
+		}
+	}
+	way[6] = Node{
+		ID:    6,
+		Name:  "campfire",
+		Visit: 0,
+	}
+	monster, _ := config.SqlClient.Monster.Query().Where(monster.ID(id[6])).First(context.Background())
+	way[7] = Node{
+		ID:    7,
+		Name:  monster.Name,
+		Visit: 0,
+	}
+	jsonWay, _ := json.Marshal(way)
+	return string(jsonWay)
 }

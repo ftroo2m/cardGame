@@ -25,5 +25,6 @@ func Init(e *gin.Engine) {
 	g.POST("/map", handles.Map)
 	g.POST("/c/rest", handles.Rest)
 	g.POST("/win", handles.Win)
+	g.POST("/card", handles.Card)
 	//g.POST("/archive", handles.Archive)
 }

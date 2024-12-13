@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -32,7 +33,7 @@ var (
 	// LeaderboardsColumns holds the columns for the "leaderboards" table.
 	LeaderboardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "player_id", Type: field.TypeString, Unique: true},
+		{Name: "playerID", Type: field.TypeString, Unique: true},
 		{Name: "counts", Type: field.TypeInt},
 	}
 	// LeaderboardsTable holds the schema information for the "leaderboards" table.
@@ -45,12 +46,12 @@ var (
 	MonstersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "type", Type: field.TypeString},
-		{Name: "hp", Type: field.TypeInt},
+		{Name: "Type", Type: field.TypeString},
+		{Name: "HP", Type: field.TypeInt},
 		{Name: "block", Type: field.TypeInt},
 		{Name: "power", Type: field.TypeJSON},
-		{Name: "action_name", Type: field.TypeJSON},
-		{Name: "action_value", Type: field.TypeJSON},
+		{Name: "actionName", Type: field.TypeJSON},
+		{Name: "actionValue", Type: field.TypeJSON},
 		{Name: "image", Type: field.TypeString},
 	}
 	// MonstersTable holds the schema information for the "monsters" table.
@@ -71,21 +72,21 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
-	// UserConfigsColumns holds the columns for the "user_configs" table.
-	UserConfigsColumns = []*schema.Column{
+	// UserconfigsColumns holds the columns for the "userconfigs" table.
+	UserconfigsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "player_id", Type: field.TypeString, Unique: true},
+		{Name: "playerID", Type: field.TypeString, Unique: true},
 		{Name: "cards", Type: field.TypeJSON},
 		{Name: "ladder", Type: field.TypeString},
-		{Name: "player_hp", Type: field.TypeInt},
-		{Name: "player_energy", Type: field.TypeInt},
+		{Name: "playerHP", Type: field.TypeInt},
+		{Name: "playerEnergy", Type: field.TypeInt},
 		{Name: "image", Type: field.TypeString, Nullable: true},
 	}
-	// UserConfigsTable holds the schema information for the "user_configs" table.
-	UserConfigsTable = &schema.Table{
-		Name:       "user_configs",
-		Columns:    UserConfigsColumns,
-		PrimaryKey: []*schema.Column{UserConfigsColumns[0]},
+	// UserconfigsTable holds the schema information for the "userconfigs" table.
+	UserconfigsTable = &schema.Table{
+		Name:       "userconfigs",
+		Columns:    UserconfigsColumns,
+		PrimaryKey: []*schema.Column{UserconfigsColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -93,9 +94,24 @@ var (
 		LeaderboardsTable,
 		MonstersTable,
 		UsersTable,
-		UserConfigsTable,
+		UserconfigsTable,
 	}
 )
 
 func init() {
+	CardsTable.Annotation = &entsql.Annotation{
+		Table: "cards",
+	}
+	LeaderboardsTable.Annotation = &entsql.Annotation{
+		Table: "leaderboards",
+	}
+	MonstersTable.Annotation = &entsql.Annotation{
+		Table: "monsters",
+	}
+	UsersTable.Annotation = &entsql.Annotation{
+		Table: "users",
+	}
+	UserconfigsTable.Annotation = &entsql.Annotation{
+		Table: "userconfigs",
+	}
 }

@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
 
@@ -10,11 +12,17 @@ type Leaderboard struct {
 	ent.Schema
 }
 
+func (Leaderboard) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "leaderboards"},
+	}
+}
+
 // Fields of the Leaderboard.
 func (Leaderboard) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("playerID").NotEmpty().Unique(),
-		field.Int("counts"),
+		field.String("playerID").StorageKey("playerID").NotEmpty().Unique(),
+		field.Int("counts").StorageKey("counts"),
 	}
 }
 
