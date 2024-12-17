@@ -8,10 +8,6 @@ import (
 	"net/http"
 )
 
-type StartGameRequest struct {
-	Room int `json:"room"`
-}
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		// 允许所有请求，实际项目中可以根据需求限制跨域
@@ -20,11 +16,6 @@ var upgrader = websocket.Upgrader{
 }
 
 func StartGame(c *gin.Context) {
-	var req StartGameRequest
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
-		return
-	}
 	cookieName := "playerID"
 	playerID, err := c.Cookie(cookieName)
 	if err != nil {
@@ -36,5 +27,5 @@ func StartGame(c *gin.Context) {
 		log.Println("Failed to upgrade to WebSocket:", err)
 		return
 	}
-	model.GameManagerUse.CreateGame(playerID, req.Room, conn)
+	model.GameManagerUse.CreateGame(playerID, conn)
 }

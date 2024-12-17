@@ -2,6 +2,7 @@ package model
 
 import (
 	"cardGame/config"
+	"cardGame/ent"
 	"cardGame/ent/userconfig"
 	"context"
 	"encoding/json"
@@ -22,7 +23,7 @@ func NewGameManager() *GameManager {
 	}
 }
 
-func (gm *GameManager) CreateGame(playerID string, room int, conn *websocket.Conn) {
+func (gm *GameManager) CreateGame(playerID string, conn *websocket.Conn) {
 	gm.mu.Lock()
 	defer gm.mu.Unlock()
 	var player *Player
@@ -30,9 +31,15 @@ func (gm *GameManager) CreateGame(playerID string, room int, conn *websocket.Con
 	player = NewPlayer(playerID, userconfig.PlayerHP, 0, 3, map[string]int{}, []string{}, "")
 	var nodes []Node
 	json.Unmarshal([]byte(userconfig.Ladder), &nodes)
-
-	monster := config.MonsterList[nodes[room].Name]
-	game := NewGame(player, &monster, conn)
+	var monster ent.Monster
+	for i := 0; i < len(nodes); i++ {
+		if nodes[i].Visit == 0 {
+			monster = config.MonsterList[nodes[i].Name]
+			monster.Power = map[string]int{}
+			break
+		}
+	}
+	game := NewGame(player, &monster, userconfig.Cards, conn)
 	gm.games[playerID] = game
 	go game.Run()
 }

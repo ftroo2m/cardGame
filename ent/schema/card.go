@@ -25,7 +25,7 @@ func (Card) Fields() []ent.Field {
 		// Type field with type string.
 		field.String("Type").StorageKey("type"),
 		// Energy field with type int.
-		field.Int("Energy").StorageKey("energy"),
+		field.Int("Energy").StorageKey("energy").StructTag(`json:"Energy"`),
 		// Target field with type string.
 		field.String("Target").StorageKey("target"),
 		// Block field with type int.

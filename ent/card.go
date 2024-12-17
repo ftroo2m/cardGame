@@ -22,7 +22,7 @@ type Card struct {
 	// Type holds the value of the "Type" field.
 	Type string `json:"Type,omitempty"`
 	// Energy holds the value of the "Energy" field.
-	Energy int `json:"Energy,omitempty"`
+	Energy int `json:"Energy"`
 	// Target holds the value of the "Target" field.
 	Target string `json:"Target,omitempty"`
 	// Block holds the value of the "Block" field.

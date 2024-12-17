@@ -34,7 +34,7 @@ func Login(c *gin.Context) {
 	if User.Password != req.Password {
 		util.ErrorStrResp(c, "Password error", 401, true)
 	} else {
-		c.SetCookie("playerID", User.Username, 3600, "/", "localhost", false, true)
+		c.SetCookie("playerID", User.Username, 86400, "/", "localhost", false, false)
 		util.SuccessResp(c)
 	}
 }
@@ -44,7 +44,7 @@ func Logout(c *gin.Context) {
 		Name:     "playerID",      // cookie的名称
 		Value:    "",              // cookie的值设置为空
 		Expires:  time.Unix(0, 0), // 设置过期时间为1970年1月1日
-		HttpOnly: true,            // 设置HttpOnly标志，提高安全性
+		HttpOnly: false,           // 设置HttpOnly标志，提高安全性
 		Path:     "/",             // 设置cookie的有效路径
 	})
 	util.SuccessResp(c)
@@ -60,7 +60,7 @@ func Register(c *gin.Context) {
 	u, _ := config.SqlClient.
 		User.Query().Where(user.Username(req.Username)).First(context.Background())
 	if u != nil {
-		util.ErrorResp(c, err, 401, true)
+		util.ErrorResp(c, err, 301, true)
 	}
 	way := model.GetWay()
 	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
@@ -75,5 +75,12 @@ func Register(c *gin.Context) {
 		panic(err)
 		util.ErrorResp(c, err, 401, true)
 	}
-	util.SuccessResp(c)
+	ur, _ := config.SqlClient.
+		User.Query().Where(user.Username(req.Username)).First(context.Background())
+	go util.NewPlayer(ur.ID + 5)
+	imageBase64 := util.ImageToBase64Player(ur.ID)
+	c.SetCookie("playerID", ur.Username, 86400, "/", "localhost", false, false)
+	util.SuccessResp(c, gin.H{
+		"image": imageBase64,
+	})
 }

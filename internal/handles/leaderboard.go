@@ -5,6 +5,7 @@ import (
 	"cardGame/internal/util"
 	"context"
 	"github.com/gin-gonic/gin"
+	"sort"
 )
 
 type UserResponse struct {
@@ -27,6 +28,10 @@ func LeaderBoard(c *gin.Context) {
 			Counts:   player.Counts,
 		}
 	}
+
+	sort.Slice(userResponses, func(i, j int) bool {
+		return userResponses[i].Counts > userResponses[j].Counts
+	})
 
 	util.SuccessResp(c, gin.H{"leaderboard": userResponses})
 }
