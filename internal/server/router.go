@@ -49,5 +49,4 @@ func Init(e *gin.Engine) {
 	g.POST("/newgame", handles.NewGame)
 	g.POST("/card", handles.Card)
 	g.POST("/onecard", handles.OneCard)
-	//g.POST("/archive", handles.Archive)
 }

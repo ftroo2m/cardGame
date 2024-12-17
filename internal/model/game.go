@@ -185,7 +185,11 @@ func (g *Game) monsterDeath() {
 	}
 	if p == 8 {
 		leaderBoard, _ := config.SqlClient.Leaderboard.Query().Where(leaderboard.PlayerID(g.Player.ID)).First(context.Background())
-		config.SqlClient.Leaderboard.Update().Where(leaderboard.PlayerID(g.Player.ID)).SetCounts(leaderBoard.Counts + 1).Save(context.Background())
+		if leaderBoard == nil {
+			config.SqlClient.Leaderboard.Create().SetPlayerID(g.Player.ID).SetCounts(1).Save(context.Background())
+		} else {
+			config.SqlClient.Leaderboard.Update().Where(leaderboard.PlayerID(g.Player.ID)).SetCounts(leaderBoard.Counts + 1).Save(context.Background())
+		}
 	}
 	g.exit()
 }
