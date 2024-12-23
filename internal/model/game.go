@@ -233,7 +233,7 @@ func (g *Game) endRound() {
 		if g.Hand < 10 {
 			g.DrawCard(1)
 		}
-		g.returnMessage("endRound")
+		g.returnMessage("endRoundReturn")
 	}
 }
 

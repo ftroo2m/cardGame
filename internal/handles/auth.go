@@ -55,7 +55,6 @@ func Register(c *gin.Context) {
 	err := c.BindJSON(&req)
 	if err != nil {
 		util.ErrorResp(c, err, http.StatusBadRequest, true)
-		return
 	}
 	u, _ := config.SqlClient.
 		User.Query().Where(user.Username(req.Username)).First(context.Background())
