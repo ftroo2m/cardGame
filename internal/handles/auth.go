@@ -2,10 +2,12 @@ package handles
 
 import (
 	"cardGame/config"
+	"cardGame/ent"
 	"cardGame/ent/user"
 	"cardGame/internal/model"
 	"cardGame/internal/util"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -63,13 +65,21 @@ func Register(c *gin.Context) {
 	}
 	way := model.GetWay()
 	initialHand := []string{"袭击", "袭击", "袭击", "袭击", "袭击", "防御", "防御", "防御", "防御", "猛击"}
+	maxID, err := config.SqlClient.User.Query().
+		Aggregate(ent.Max("id")).
+		Int(context.Background())
+	if err != nil {
+		panic(err)
+		fmt.Printf("Failed to query max ID: %v", err)
+	}
+	fmt.Printf("Max User ID: %d\n", maxID)
 	_, err = config.SqlClient.UserConfig.Create().SetPlayerID(req.Username).SetPlayerHP(72).SetPlayerEnergy(3).SetLadder(way).SetCards(initialHand).Save(context.Background())
 	if err != nil {
 		panic(err)
 		util.ErrorResp(c, err, 401, true)
 	}
 	_, err = config.SqlClient.
-		User.Create().SetUsername(req.Username).SetPassword(req.Password).Save(context.Background())
+		User.Create().SetID(maxID + 1).SetUsername(req.Username).SetPassword(req.Password).Save(context.Background())
 	if err != nil {
 		panic(err)
 		util.ErrorResp(c, err, 401, true)

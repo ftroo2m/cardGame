@@ -3,14 +3,13 @@ package config
 import (
 	"cardGame/ent"
 	"context"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	_ "github.com/go-sql-driver/mysql" // 加载 MySQL 驱动
+	_ "github.com/lib/pq"
 	"log"
 	"time"
 )
 
-var DataBase = "root:0987654321@tcp(127.0.0.1:3306)/cardgame?parseTime=True"
+var DataBase = "postgres://user:password@ip:port/cardgame?sslmode=disable"
 
 var SqlClient *ent.Client
 
@@ -32,7 +31,7 @@ func Init() {
 }
 
 func createDatabase() (*ent.Client, error) {
-	drv, err := sql.Open(dialect.MySQL, DataBase)
+	drv, err := sql.Open("postgres", DataBase)
 	if err != nil {
 		return nil, err
 	}

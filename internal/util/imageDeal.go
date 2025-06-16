@@ -81,7 +81,7 @@ func NewPlayer(id int) {
 
 	// Create the request payload
 	payload := ImageGenerationRequest{
-		Model:             "stabilityai/stable-diffusion-3-5-large",
+		Model:             "Kwai-Kolors/Kolors",
 		Prompt:            combination,
 		NegativePrompt:    "",
 		ImageSize:         "576x1024",
@@ -105,7 +105,7 @@ func NewPlayer(id int) {
 	}
 
 	// Add headers
-	req.Header.Add("Authorization", "Bearer sk-fnvftruuyuyxdeoqnsxkljolmydwnplphxbrkjajchnctdqf")
+	req.Header.Add("Authorization", "your api token")
 	req.Header.Add("Content-Type", "application/json")
 
 	// Perform the request

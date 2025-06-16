@@ -21,10 +21,18 @@ func (User) Annotations() []schema.Annotation {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		// 定义 username 字段，类型为字符串，不允许为空。
-		field.String("username").StorageKey("username").NotEmpty().Unique(),
-		// 定义 password 字段，类型为字符串，不允许为空。
-		field.String("password").StorageKey("password").NotEmpty(),
+		// 添加 ID 字段
+		field.Int("id").
+			StorageKey("id"),
+		// 定义 username 字段
+		field.String("username").
+			StorageKey("username").
+			NotEmpty().
+			Unique(),
+		// 定义 password 字段
+		field.String("password").
+			StorageKey("password").
+			NotEmpty(),
 	}
 }
 

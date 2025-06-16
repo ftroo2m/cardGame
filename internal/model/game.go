@@ -203,6 +203,7 @@ func (g *Game) init() {
 	g.Player.Block = 0
 	g.MonsterActionIndex = 0
 	u, _ := config.SqlClient.User.Query().Where(user.Username(g.Player.ID)).First(context.Background())
+	fmt.Println(g)
 	g.Player.Image = util.ImageToBase64Player(u.ID)
 	g.Monster.Image = util.ImageTobase64(g.Monster.Name)
 	g.returnMessage("initReturn")
